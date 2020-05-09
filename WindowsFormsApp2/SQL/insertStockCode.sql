@@ -1,0 +1,1 @@
+﻿insert into tbl_stock_code(stockCode, stockName, createdDate) values('{0}','{1}',NOW());
