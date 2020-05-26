@@ -74,7 +74,8 @@ namespace WindowsFormsApp2.Properties {
         /// <summary>
         ///   Looks up a localized string similar to select *
         ///from tbl_stock_daily
-        ///where inqDate = &apos;{0}&apos; and stockCode = &apos;{1}&apos;.
+        ///where inqDate = &apos;{0}&apos; and stockCode = &apos;{1}&apos;
+        ///limit 0, 1.
         /// </summary>
         internal static string getStockDailyInfo {
             get {
@@ -117,6 +118,274 @@ namespace WindowsFormsApp2.Properties {
         internal static string insertStockDaily {
             get {
                 return ResourceManager.GetString("insertStockDaily", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to INSERT into tbl_stock_target(inqDate, stockCode, stockName, startPrice, currentPrice
+        ///, STATUS, minsElapsed, createdDate)
+        ///SELECT a.inqDate, a.stockCode, a.stockName, a.currentPrice, a.currentPrice, &apos;대기&apos;, 0, NOW()
+        ///FROM tbl_stock_daily a
+        ///	LEFT OUTER JOIN tbl_stock_target b ON a.inqDate = b.inqDate AND a.stockCode = b.stockCode
+        ///WHERE a.inqDate = &apos;{0}&apos; AND b.inqDate IS null;.
+        /// </summary>
+        internal static string setStockTarget {
+            get {
+                return ResourceManager.GetString("setStockTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE tbl_stock_target a
+        ///	INNER JOIN tbl_stock_daily b ON a.inqDate = b.inqDate
+        ///		AND a.stockCode = b.stockCode and a.currentPrice &lt;&gt; b.currentPrice
+        ///SET a.currentPrice = b.currentPrice
+        ///, a.updatedDate = NOW()
+        ///WHERE b.inqDate = &apos;{0}&apos;.
+        /// </summary>
+        internal static string 거래량정보에서현재가갱신 {
+            get {
+                return ResourceManager.GetString("거래량정보에서현재가갱신", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT *
+        ///from tbl_stock_target
+        ///WHERE inqDate = &apos;{0}&apos;
+        ///AND STATUS = &apos;대기&apos;.
+        /// </summary>
+        internal static string 금일매수대상종목조회 {
+            get {
+                return ResourceManager.GetString("금일매수대상종목조회", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT 
+        ///a.orderNo
+        ///, b.inqDate
+        ///, b.stockCode
+        ///, b.stockName
+        ///, b.Qty
+        ///, a.confirmPrice as Price
+        ///, b.OrderType
+        ///, b.`Status`
+        ///, b.APIResult
+        ///, b.createdDate
+        ///, b.updateDate
+        ///FROM tbl_stock_myorderlist a
+        ///	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
+        ///		AND a.Qty = b.Qty AND a.Price = b.Price
+        ///		AND b.OrderType = &apos;매도&apos; AND b.`Status` = &apos;요청중&apos;
+        ///WHERE a.orderType like &apos;현금매도%&apos; AND a.acceptType = &apos;주문완료&apos;
+        ///AND a.confirmNo &lt;&gt; &apos;&apos;
+        ///AND a.confirmQty &gt; 0 AND a.confirmPrice &gt; 0        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string 매도완료업데이트대상조회 {
+            get {
+                return ResourceManager.GetString("매도완료업데이트대상조회", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT 
+        ///a.orderNo
+        ///, b.inqDate
+        ///, b.stockCode
+        ///, b.stockName
+        ///, b.Qty
+        ///, a.confirmPrice as Price
+        ///, b.OrderType
+        ///, b.`Status`
+        ///, b.APIResult
+        ///, b.createdDate
+        ///, b.updateDate
+        ///FROM tbl_stock_myorderlist a
+        ///	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
+        ///		AND a.confirmQty = b.Qty AND a.Price = b.Price
+        ///		AND b.OrderType = &apos;매수&apos; AND b.`Status` = &apos;요청중&apos;
+        ///WHERE a.orderType like &apos;현금매수%&apos; AND a.acceptType = &apos;주문완료&apos;
+        ///AND a.confirmNo &lt;&gt; &apos;&apos;
+        ///AND a.confirmQty &gt; 0 AND a.confirmPri [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string 매수완료업데이트대상및매도대상조회 {
+            get {
+                return ResourceManager.GetString("매수완료업데이트대상및매도대상조회", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE tbl_stock_daily
+        ///SET currentPrice = {2}
+        ///WHERE inqDate = &apos;{0}&apos; and stockCode = &apos;{1}&apos;.
+        /// </summary>
+        internal static string 종목현재가갱신 {
+            get {
+                return ResourceManager.GetString("종목현재가갱신", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to update tbl_stock_target
+        ///set status = &apos;대기&apos;
+        ///, currentPrice = startPrice
+        ///where inqDate = &apos;{0}&apos; and stockCode = &apos;{1}&apos; and status = &apos;매도요청중&apos;.
+        /// </summary>
+        internal static string 주식상태대기로변경 {
+            get {
+                return ResourceManager.GetString("주식상태대기로변경", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to update tbl_stock_target
+        ///set status = &apos;매도요청중&apos;
+        ///where inqDate = &apos;{0}&apos; and stockCode = &apos;{1}&apos; and status = &apos;매수요청중&apos;.
+        /// </summary>
+        internal static string 주식상태매도요청중으로변경 {
+            get {
+                return ResourceManager.GetString("주식상태매도요청중으로변경", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to update tbl_stock_target
+        ///set status = &apos;매수요청중&apos;
+        ///where inqDate = &apos;{0}&apos; and stockCode = &apos;{1}&apos; and status = &apos;대기&apos;.
+        /// </summary>
+        internal static string 주식상태매수요청중으로변경 {
+            get {
+                return ResourceManager.GetString("주식상태매수요청중으로변경", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to insert into tbl_stock_order( inqDate, stockCode, stockName, Qty, Price
+        ///, OrderType, Status, APIResult, createdDate)
+        ///values( &apos;{0}&apos;,&apos;{1}&apos;,&apos;{2}&apos;,&apos;{3}&apos;,&apos;{4}&apos;,&apos;{5}&apos;,&apos;{6}&apos;,&apos;{7}&apos;,NOW()).
+        /// </summary>
+        internal static string 주식주문이력추가 {
+            get {
+                return ResourceManager.GetString("주식주문이력추가", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to update tbl_stock_myorderlist
+        ///set stockBondGubun = &apos;{3}&apos; , sellFlag = &apos;{4}&apos; , orderType = &apos;{5}&apos; , Qty = &apos;{6}&apos; , Price = &apos;{7}&apos;
+        ///, ReserveDeny = &apos;{8}&apos; , confirmNo = &apos;{9}&apos; , acceptType = &apos;{10}&apos; , orgOrderNo = &apos;{11}&apos; , stockName = &apos;{12}&apos;
+        ///, payType = &apos;{13}&apos; , creditTransType = &apos;{14}&apos;, confirmQty = &apos;{15}&apos;, confirmPrice = &apos;{16}&apos;, commType = &apos;{17}&apos;
+        ///, modifyFlag = &apos;{18}&apos;, confirmedTime = &apos;{19}&apos;
+        ///where orderDate = &apos;{0}&apos;
+        ///and orderNo = &apos;{1}&apos;
+        ///and stockCode = &apos;{2}&apos;.
+        /// </summary>
+        internal static string 체결내역업데이트 {
+            get {
+                return ResourceManager.GetString("체결내역업데이트", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to select *
+        ///from tbl_stock_myorderlist
+        ///where orderDate = &apos;{0}&apos;
+        ///and orderNo = &apos;{1}&apos;
+        ///and stockCode = &apos;{2}&apos;.
+        /// </summary>
+        internal static string 체결내역있는지검사 {
+            get {
+                return ResourceManager.GetString("체결내역있는지검사", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to INSERT INTO tbl_stock_myorderlist(
+        ///stockBondGubun
+        ///, orderNo
+        ///, stockCode
+        ///, sellFlag
+        ///, orderType
+        ///, Qty
+        ///, Price
+        ///, CheckQty
+        ///, reserveDeny
+        ///, confirmNo
+        ///, acceptType
+        ///, orgOrderNo
+        ///, stockName
+        ///, payType
+        ///, creditTransType
+        ///, confirmQty
+        ///, confirmPrice
+        ///, commType
+        ///, modifyFlag
+        ///, confirmedTime
+        ///, orderDate
+        ///, createdDate
+        ///)
+        ///VALUES
+        ///(
+        ///&apos;{0}&apos;
+        ///, &apos;{1}&apos;
+        ///, &apos;{2}&apos;
+        ///, &apos;{3}&apos;
+        ///, &apos;{4}&apos;
+        ///, &apos;{5}&apos;
+        ///, &apos;{6}&apos;
+        ///, &apos;{7}&apos;
+        ///, &apos;{8}&apos;
+        ///, &apos;{9}&apos;
+        ///, &apos;{10}&apos;
+        ///, &apos;{11}&apos;
+        ///, &apos;{12}&apos;
+        ///, &apos;{13}&apos;
+        ///, &apos;{14}&apos;
+        ///, &apos;{15}&apos;
+        ///, &apos;{16}&apos;
+        ///, &apos;{17}&apos;
+        ///, [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string 체결내역한건등록 {
+            get {
+                return ResourceManager.GetString("체결내역한건등록", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE tbl_stock_order
+        ///SET STATUS = &apos;완료&apos;
+        ///, orderNo = &apos;{3}&apos;
+        ///, updateDate = NOW()
+        ///, price = &apos;{4}&apos;
+        ///WHERE inqDate = &apos;{0}&apos;
+        ///AND stockCode = &apos;{1}&apos;
+        ///AND Qty = &apos;{2}&apos;
+        ///and OrderType = &apos;매수&apos;
+        ///and Status = &apos;요청중&apos;.
+        /// </summary>
+        internal static string 체결요청내역으로내주문업데이트 {
+            get {
+                return ResourceManager.GetString("체결요청내역으로내주문업데이트", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE tbl_stock_order
+        ///SET STATUS = &apos;완료&apos;
+        ///, orderNo = &apos;{3}&apos;
+        ///, updateDate = NOW()
+        ///, price = &apos;{4}&apos;
+        ///WHERE inqDate = &apos;{0}&apos;
+        ///AND stockCode = &apos;{1}&apos;
+        ///AND Qty = &apos;{2}&apos;
+        ///and OrderType = &apos;매도&apos;
+        ///and Status = &apos;요청중&apos;.
+        /// </summary>
+        internal static string 체결요청내역으로매도완료업데이트 {
+            get {
+                return ResourceManager.GetString("체결요청내역으로매도완료업데이트", resourceCulture);
             }
         }
     }

@@ -16,10 +16,10 @@ namespace WindowsFormsApp2
 {
     public partial class Form1 : Form
     {
-        List<StockCode> stockList = new List<StockCode>();
+        Biz biz = new Biz();
         DacStock dacStock = new DacStock();
-        bool bDoneStockCodeUpdate = false;
         string inqDate = DateTime.Now.ToString("yyyyMMdd");
+        //string orderDate = "20200517";
 
         public Form1()
         {
@@ -37,12 +37,17 @@ namespace WindowsFormsApp2
             {
                 if (e.nErrCode == 0)
                 {
+                    biz.OpenAPI = axKHOpenAPI1;
+
                     string accountlist = axKHOpenAPI1.GetLoginInfo("ACCLIST");
                     string[] account = accountlist.Split(';');
                     for (int i = 0; i < account.Length; i++)
                     {
                         comboBox1.Items.Add(account[i]);
                     }
+
+                    if ( account.Length > 0 )
+                        comboBox1.SelectedIndex = 0;
 
                     string userId = axKHOpenAPI1.GetLoginInfo("USER_ID");
                     string userName = axKHOpenAPI1.GetLoginInfo("USER_NAME");
@@ -62,7 +67,7 @@ namespace WindowsFormsApp2
                         code.stockCode = stockCodeArray[i];
                         code.stockName = axKHOpenAPI1.GetMasterCodeName(stockCodeArray[i]);
 
-                        stockList.Add(code);
+                        biz.stockList.Add(code);
                     }
                 }
                 else
@@ -187,34 +192,11 @@ namespace WindowsFormsApp2
                 }
                 else if (e.sRQName.Equals("거래량순조회"))
                 {
-                    int rowCount = axKHOpenAPI1.GetRepeatCnt(e.sTrCode, e.sRQName);
-
-                    for ( int i = 0; i < rowCount; i++ )
-                    {
-                        StockDaily stockInfo = new StockDaily();
-                        stockInfo.inqDate = inqDate;
-                        stockInfo.stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
-                        stockInfo.stockName = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
-                        
-                        stockInfo.currentPrice = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "현재가").Trim();
-                        if ( !string.IsNullOrWhiteSpace( stockInfo.currentPrice) )
-                            stockInfo.currentPrice = Math.Abs(decimal.Parse(stockInfo.currentPrice)).ToString();
-
-                        stockInfo.traffic = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "현재거래량").Trim();
-                        stockInfo.diffBefore = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "전일대비").Trim();
-
-                        if (dacStock.GetStockDailyInfo(inqDate, stockList[i].stockCode) == null)
-                            dacStock.insertStockDaily(stockInfo);
-                    }
+                    biz.거래량순리스트조회처리(sender, e);
                 }
                 else if (e.sRQName.Equals("계좌별주문체결현황요청"))
                 {
-                    string count = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "조회건수").Trim();
-                    string orderNo = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "주문번호").Trim();
-
-                    int rowCount = axKHOpenAPI1.GetRepeatCnt(e.sTrCode, e.sRQName);
-
-                    MessageBox.Show(orderNo);
+                    biz.계좌별주문체결현황요청응답처리(inqDate, sender, e, e.sPrevNext);
                 }
 
             }
@@ -249,8 +231,8 @@ namespace WindowsFormsApp2
             try
             {
                 string stockName = txtStockName.Text;
-                int index = stockList.FindIndex(o => o.stockName == stockName);
-                string stockCode = stockList[index].stockCode;
+                int index = biz.stockList.FindIndex(o => o.stockName == stockName);
+                string stockCode = biz.stockList[index].stockCode;
                 currentStockCode = stockCode;
 
                 axKHOpenAPI1.SetInputValue("종목코드", stockCode);
@@ -337,115 +319,6 @@ namespace WindowsFormsApp2
             }
         }
 
-        #region 백그라운드 잡
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
-        {
-            // Do not access the form's BackgroundWorker reference directly.
-            // Instead, use the reference provided by the sender parameter.
-            BackgroundWorker bw = sender as BackgroundWorker;
-
-            // Extract the argument.
-            int arg = (int)e.Argument;
-
-            // Start the time-consuming operation.
-            e.Result = TimeConsumingOperation(bw, arg);
-
-            // If the operation was canceled by the user,
-            // set the DoWorkEventArgs.Cancel property to true.
-            if (bw.CancellationPending)
-            {
-                e.Cancel = true;
-            }
-        }
-
-        // This method models an operation that may take a long time
-        // to run. It can be cancelled, it can raise an exception,
-        // or it can exit normally and return a result. These outcomes
-        // are chosen randomly.
-        private int TimeConsumingOperation(
-            BackgroundWorker bw,
-            int sleepPeriod)
-        {
-            int result = 0;
-
-            Random rand = new Random();
-
-            while (!bw.CancellationPending)
-            {
-                bool exit = false;
-
-                // tbl_stock_code 를 초기화 및 업데이트를 한다.(하루에 한번)
-                if (!bDoneStockCodeUpdate)
-                    UpdateStockCode(bw);
-                /*
-                for (int i = 0; i < stockList.Count; i++)
-                {
-                    if (dacStock.GetStockDailyInfo(inqDate, stockList[i].stockCode) == null)
-                    {
-        
-                        axKHOpenAPI1.SetInputValue("종목코드", stockList[i].stockCode);
-                        axKHOpenAPI1.CommRqData("종목정보요청Job", "opt10001", 0, "5000");
-        
-
-                        
-
-                        Thread.Sleep(2000);
-                    }
-
-                    bw.ReportProgress(i);
-
-
-                    if (bw.CancellationPending) break;
-                }
-        */
-
-                axKHOpenAPI1.SetInputValue("시장구분", "001"); // 000 : 전체, 001: 코스피, 101 : 코스닥
-                axKHOpenAPI1.SetInputValue("주기구분", "5");
-                axKHOpenAPI1.SetInputValue("거래량구분", "1000");
-                axKHOpenAPI1.CommRqData("거래량순조회", "opt10024", 0, "5001");
-
-                Thread.Sleep(sleepPeriod);
-
-                exit = true;
-
-                if (exit)
-                {
-                    break;
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// tbl_stock_code 를 초기화 및 업데이트를 한다.(하루에 한번)
-        /// </summary>
-        /// <param name="bw"></param>
-        private void UpdateStockCode(BackgroundWorker bw)
-        {
-            for (int i = 0; i < stockList.Count; i++)
-            {
-                if (dacStock.GetStockCode(stockList[i]) == null)
-                {
-                    dacStock.insertStockCode(stockList[i]);
-                }
-
-                // (i + 1) / stockList.Count * 100
-                bw.ReportProgress(i);
-
-                if (bw.CancellationPending) break;
-            }
-
-            bDoneStockCodeUpdate = true;
-        }
-
-        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            lblStockCount.Text = e.ProgressPercentage.ToString();
-        }
-
-        #endregion
-
         /// <summary>
         /// 자동 프로그램 매매 시작
         /// </summary>
@@ -455,7 +328,18 @@ namespace WindowsFormsApp2
         {
             try
             {
-                this.backgroundWorker1.RunWorkerAsync(2000);
+                if ( string.IsNullOrWhiteSpace(biz.AccountNo))
+                {
+                    if ( comboBox1.SelectedItem == null || string.IsNullOrWhiteSpace(comboBox1.SelectedItem.ToString() ))
+                    {
+                        MessageBox.Show("계좌를 선택해 주십시오.");
+                        return;
+                    }
+
+                    biz.AccountNo = comboBox1.SelectedItem.ToString();
+                }
+
+                this.backgroundWorker1.RunWorkerAsync(10000);
 
             }
             catch (Exception ex)
@@ -486,7 +370,7 @@ namespace WindowsFormsApp2
             try
             {
                 // 주문일자 = YYYYMMDD (20170101 연도4자리, 월 2자리, 일 2자리 형식)
-                axKHOpenAPI1.SetInputValue("주문일자", "20200504");
+                axKHOpenAPI1.SetInputValue("주문일자", inqDate);
 
                 // 계좌번호 = 전문 조회할 보유계좌번호
                 axKHOpenAPI1.SetInputValue("계좌번호", comboBox1.SelectedItem.ToString());
@@ -514,12 +398,41 @@ namespace WindowsFormsApp2
 
                 int result = axKHOpenAPI1.CommRqData("계좌별주문체결현황요청", "opw00009", 0, "1234");
 
-                MessageBox.Show(result.ToString());
 
             } catch ( Exception ex )
             {
                 MessageBox.Show(ex.Message);
             }
         }
+
+
+        #region 백그라운드 잡
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Do not access the form's BackgroundWorker reference directly.
+            // Instead, use the reference provided by the sender parameter.
+            BackgroundWorker bw = sender as BackgroundWorker;
+
+            // Extract the argument.
+            int arg = (int)e.Argument;
+
+            // Start the time-consuming operation.
+            e.Result = biz.TimeConsumingOperation(bw, arg);
+
+            // If the operation was canceled by the user,
+            // set the DoWorkEventArgs.Cancel property to true.
+            if (bw.CancellationPending)
+            {
+                e.Cancel = true;
+            }
+        }
+
+        
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            lblStockCount.Text = e.ProgressPercentage.ToString();
+        }
+
+        #endregion
     }
 }

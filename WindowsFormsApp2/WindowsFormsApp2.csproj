@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\Biz.cs" />
     <Compile Include="Common\DBHelper.cs" />
     <Compile Include="Dac\DacStock.cs" />
     <Compile Include="Data\Entity.cs" />

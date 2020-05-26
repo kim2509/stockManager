@@ -125,7 +125,8 @@ where stockCode = '{0}' and stockName = '{1}'</value>
   <data name="getStockDailyInfo" xml:space="preserve">
     <value>select *
 from tbl_stock_daily
-where inqDate = '{0}' and stockCode = '{1}'</value>
+where inqDate = '{0}' and stockCode = '{1}'
+limit 0, 1</value>
   </data>
   <data name="insertStockCode" xml:space="preserve">
     <value>insert into tbl_stock_code(stockCode, stockName, createdDate) values('{0}','{1}',NOW());</value>
@@ -152,5 +153,189 @@ values
 ,'{6}'
 , NOW()
 )</value>
+  </data>
+  <data name="setStockTarget" xml:space="preserve">
+    <value>INSERT into tbl_stock_target(inqDate, stockCode, stockName, startPrice, currentPrice
+, STATUS, minsElapsed, createdDate)
+SELECT a.inqDate, a.stockCode, a.stockName, a.currentPrice, a.currentPrice, '대기', 0, NOW()
+FROM tbl_stock_daily a
+	LEFT OUTER JOIN tbl_stock_target b ON a.inqDate = b.inqDate AND a.stockCode = b.stockCode
+WHERE a.inqDate = '{0}' AND b.inqDate IS null;</value>
+  </data>
+  <data name="거래량정보에서현재가갱신" xml:space="preserve">
+    <value>UPDATE tbl_stock_target a
+	INNER JOIN tbl_stock_daily b ON a.inqDate = b.inqDate
+		AND a.stockCode = b.stockCode and a.currentPrice &lt;&gt; b.currentPrice
+SET a.currentPrice = b.currentPrice
+, a.updatedDate = NOW()
+WHERE b.inqDate = '{0}'</value>
+  </data>
+  <data name="금일매수대상종목조회" xml:space="preserve">
+    <value>SELECT *
+from tbl_stock_target
+WHERE inqDate = '{0}'
+AND STATUS = '대기'</value>
+  </data>
+  <data name="매도완료업데이트대상조회" xml:space="preserve">
+    <value>SELECT 
+a.orderNo
+, b.inqDate
+, b.stockCode
+, b.stockName
+, b.Qty
+, a.confirmPrice as Price
+, b.OrderType
+, b.`Status`
+, b.APIResult
+, b.createdDate
+, b.updateDate
+FROM tbl_stock_myorderlist a
+	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
+		AND a.Qty = b.Qty AND a.Price = b.Price
+		AND b.OrderType = '매도' AND b.`Status` = '요청중'
+WHERE a.orderType like '현금매도%' AND a.acceptType = '주문완료'
+AND a.confirmNo &lt;&gt; ''
+AND a.confirmQty &gt; 0 AND a.confirmPrice &gt; 0
+AND a.OrderDate = '{0}'</value>
+  </data>
+  <data name="매수완료업데이트대상및매도대상조회" xml:space="preserve">
+    <value>SELECT 
+a.orderNo
+, b.inqDate
+, b.stockCode
+, b.stockName
+, b.Qty
+, a.confirmPrice as Price
+, b.OrderType
+, b.`Status`
+, b.APIResult
+, b.createdDate
+, b.updateDate
+FROM tbl_stock_myorderlist a
+	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
+		AND a.confirmQty = b.Qty AND a.Price = b.Price
+		AND b.OrderType = '매수' AND b.`Status` = '요청중'
+WHERE a.orderType like '현금매수%' AND a.acceptType = '주문완료'
+AND a.confirmNo &lt;&gt; ''
+AND a.confirmQty &gt; 0 AND a.confirmPrice &gt; 0
+AND a.OrderDate = '{0}'</value>
+  </data>
+  <data name="종목현재가갱신" xml:space="preserve">
+    <value>UPDATE tbl_stock_daily
+SET currentPrice = {2}
+WHERE inqDate = '{0}' and stockCode = '{1}'</value>
+  </data>
+  <data name="주식상태대기로변경" xml:space="preserve">
+    <value>update tbl_stock_target
+set status = '대기'
+, currentPrice = startPrice
+where inqDate = '{0}' and stockCode = '{1}' and status = '매도요청중'</value>
+  </data>
+  <data name="주식상태매도요청중으로변경" xml:space="preserve">
+    <value>update tbl_stock_target
+set status = '매도요청중'
+where inqDate = '{0}' and stockCode = '{1}' and status = '매수요청중'</value>
+  </data>
+  <data name="주식상태매수요청중으로변경" xml:space="preserve">
+    <value>update tbl_stock_target
+set status = '매수요청중'
+where inqDate = '{0}' and stockCode = '{1}' and status = '대기'</value>
+  </data>
+  <data name="주식주문이력추가" xml:space="preserve">
+    <value>insert into tbl_stock_order( inqDate, stockCode, stockName, Qty, Price
+, OrderType, Status, APIResult, createdDate)
+values( '{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}',NOW())</value>
+  </data>
+  <data name="체결내역업데이트" xml:space="preserve">
+    <value>update tbl_stock_myorderlist
+set stockBondGubun = '{3}' , sellFlag = '{4}' , orderType = '{5}' , Qty = '{6}' , Price = '{7}'
+, ReserveDeny = '{8}' , confirmNo = '{9}' , acceptType = '{10}' , orgOrderNo = '{11}' , stockName = '{12}'
+, payType = '{13}' , creditTransType = '{14}', confirmQty = '{15}', confirmPrice = '{16}', commType = '{17}'
+, modifyFlag = '{18}', confirmedTime = '{19}'
+where orderDate = '{0}'
+and orderNo = '{1}'
+and stockCode = '{2}'</value>
+  </data>
+  <data name="체결내역있는지검사" xml:space="preserve">
+    <value>select *
+from tbl_stock_myorderlist
+where orderDate = '{0}'
+and orderNo = '{1}'
+and stockCode = '{2}'</value>
+  </data>
+  <data name="체결내역한건등록" xml:space="preserve">
+    <value>INSERT INTO tbl_stock_myorderlist(
+stockBondGubun
+, orderNo
+, stockCode
+, sellFlag
+, orderType
+, Qty
+, Price
+, CheckQty
+, reserveDeny
+, confirmNo
+, acceptType
+, orgOrderNo
+, stockName
+, payType
+, creditTransType
+, confirmQty
+, confirmPrice
+, commType
+, modifyFlag
+, confirmedTime
+, orderDate
+, createdDate
+)
+VALUES
+(
+'{0}'
+, '{1}'
+, '{2}'
+, '{3}'
+, '{4}'
+, '{5}'
+, '{6}'
+, '{7}'
+, '{8}'
+, '{9}'
+, '{10}'
+, '{11}'
+, '{12}'
+, '{13}'
+, '{14}'
+, '{15}'
+, '{16}'
+, '{17}'
+, '{18}'
+, '{19}'
+, '{20}'
+, NOW()
+)</value>
+  </data>
+  <data name="체결요청내역으로내주문업데이트" xml:space="preserve">
+    <value>UPDATE tbl_stock_order
+SET STATUS = '완료'
+, orderNo = '{3}'
+, updateDate = NOW()
+, price = '{4}'
+WHERE inqDate = '{0}'
+AND stockCode = '{1}'
+AND Qty = '{2}'
+and OrderType = '매수'
+and Status = '요청중'</value>
+  </data>
+  <data name="체결요청내역으로매도완료업데이트" xml:space="preserve">
+    <value>UPDATE tbl_stock_order
+SET STATUS = '완료'
+, orderNo = '{3}'
+, updateDate = NOW()
+, price = '{4}'
+WHERE inqDate = '{0}'
+AND stockCode = '{1}'
+AND Qty = '{2}'
+and OrderType = '매도'
+and Status = '요청중'</value>
   </data>
 </root>

@@ -24,23 +24,27 @@ namespace WindowsFormsApp2.Common
             //var db = connectionFactory();
             //db.Open();
 
+            object workers = null;
             using (var connection = connectionFactory())
             {
-                var workers = Dapper.SqlMapper.Query<T>(connection, sql);
-                return workers;
+                workers = Dapper.SqlMapper.Query<T>(connection, sql);
             }
+
+            return workers;
         }
 
         public dynamic QuerySingle<T>(string sql)
         {
             //var db = connectionFactory();
             //db.Open();
+            object result= null;
 
             using (var connection = connectionFactory())
             {
-                var result = Dapper.SqlMapper.QuerySingleOrDefault<T>(connection, sql);
-                return result;
+                result = Dapper.SqlMapper.QuerySingleOrDefault<T>(connection, sql);
             }
+
+            return result;
         }
 
         public int Execute(string sql)
@@ -48,11 +52,13 @@ namespace WindowsFormsApp2.Common
             sql = sql.Replace(@"\r", "");
             sql = sql.Replace(@"\n", "");
 
+            int result = 0;
             using (var connection = connectionFactory())
             {
-                int result = Dapper.SqlMapper.Execute(connection, sql);
-                return result;
+                result = Dapper.SqlMapper.Execute(connection, sql);
             }
+
+            return result;
         }
     }
 }
