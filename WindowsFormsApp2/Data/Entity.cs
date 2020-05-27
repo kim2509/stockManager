@@ -33,6 +33,7 @@ namespace WindowsFormsApp2.Data
         public string stockName { get; set; }
         public string startPrice { get; set; }
         public string currentPrice { get; set; }
+        public string targetPrice { get; set; }
         public string status { get; set; }
         public string minsElapsed { get; set; }
     }

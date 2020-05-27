@@ -174,7 +174,8 @@ WHERE b.inqDate = '{0}'</value>
     <value>SELECT *
 from tbl_stock_target
 WHERE inqDate = '{0}'
-AND STATUS = '대기'</value>
+AND STATUS = '대기'
+ORDER BY ABS(startPrice - currentPrice)</value>
   </data>
   <data name="매도완료업데이트대상조회" xml:space="preserve">
     <value>SELECT 
@@ -228,7 +229,6 @@ WHERE inqDate = '{0}' and stockCode = '{1}'</value>
   <data name="주식상태대기로변경" xml:space="preserve">
     <value>update tbl_stock_target
 set status = '대기'
-, currentPrice = startPrice
 where inqDate = '{0}' and stockCode = '{1}' and status = '매도요청중'</value>
   </data>
   <data name="주식상태매도요청중으로변경" xml:space="preserve">

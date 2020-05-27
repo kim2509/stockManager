@@ -218,7 +218,7 @@ namespace WindowsFormsApp2.Common
             try
             {
                 // 09시 10분부터 15시 20분까지 매수/매도
-                if (DateTime.Now.ToString("HHmm").CompareTo("0910") < 0 ||
+                if (DateTime.Now.ToString("HHmm").CompareTo("0930") < 0 ||
                     DateTime.Now.ToString("HHmm").CompareTo("1520") > 0) return;
 
                 // 3시까지만 매수
@@ -258,9 +258,11 @@ namespace WindowsFormsApp2.Common
 
         public void BuyStock(StockTarget stock)
         {
-            int price = int.Parse(stock.currentPrice); 
+            int price = 0;
             if ( price == 0 )
                 price = int.Parse(stock.startPrice);
+            else
+                price = int.Parse(stock.currentPrice);
 
             int qty = EachStockBudget / price;
 
@@ -330,7 +332,7 @@ namespace WindowsFormsApp2.Common
                     TotalBalance += qty * price;
 
                     // 세금제외
-                    TotalBalance -= (int) (qty * price * 0.033);
+                    TotalBalance -= (int) (qty * price * 0.0033);
                 }
             }
         }
