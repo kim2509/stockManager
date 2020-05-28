@@ -258,10 +258,10 @@ namespace WindowsFormsApp2.Common
 
         public void BuyStock(StockTarget stock)
         {
-            int price = 0;
-            if ( price == 0 )
-                price = int.Parse(stock.startPrice);
-            else
+            int price = price = int.Parse(stock.startPrice);
+
+            // 시작가보다 현재가가 낮으면 현재가로 설정
+            if ( price > int.Parse(stock.currentPrice))
                 price = int.Parse(stock.currentPrice);
 
             int qty = EachStockBudget / price;
@@ -269,7 +269,7 @@ namespace WindowsFormsApp2.Common
             if (qty <= 0) return;
 
             // 천만원만 우선 사용
-            if (TotalBalance - price * qty< 0) return;
+            if (TotalBalance - price * qty<= 0) return;
 
             int resultCode = OpenAPI.SendOrder("종목신규매수", "8249", AccountNo, 1, stock.stockCode, qty, price , "00", "");
 

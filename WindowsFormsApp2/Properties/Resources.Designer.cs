@@ -150,10 +150,12 @@ namespace WindowsFormsApp2.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT *
-        ///from tbl_stock_target
-        ///WHERE inqDate = &apos;{0}&apos;
-        ///AND STATUS = &apos;대기&apos;
+        ///   Looks up a localized string similar to SELECT a.*
+        ///FROM tbl_stock_target a
+        ///	LEFT OUTER JOIN tbl_stock_order b ON a.inqDate = b.inqDate AND a.stockCode = b.stockCode AND b.Status = &apos;요청중&apos;
+        ///WHERE a.inqDate = &apos;{0}&apos;
+        ///and a.STATUS = &apos;대기&apos;
+        ///AND b.stockCode IS NULL
         ///ORDER BY ABS(startPrice - currentPrice).
         /// </summary>
         internal static string 금일매수대상종목조회 {
@@ -179,9 +181,8 @@ namespace WindowsFormsApp2.Properties {
         ///	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
         ///		AND a.Qty = b.Qty AND a.Price = b.Price
         ///		AND b.OrderType = &apos;매도&apos; AND b.`Status` = &apos;요청중&apos;
-        ///WHERE a.orderType like &apos;현금매도%&apos; AND a.acceptType = &apos;주문완료&apos;
-        ///AND a.confirmNo &lt;&gt; &apos;&apos;
-        ///AND a.confirmQty &gt; 0 AND a.confirmPrice &gt; 0        /// [rest of string was truncated]&quot;;.
+        ///              LEFT OUTER JOIN tbl_stock_order c on a.orderNo = c.orderNo
+        ///WHERE a.orderType like &apos;현금매도%&apos; AND a.acceptType = &apos; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string 매도완료업데이트대상조회 {
             get {
@@ -206,9 +207,8 @@ namespace WindowsFormsApp2.Properties {
         ///	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
         ///		AND a.confirmQty = b.Qty AND a.Price = b.Price
         ///		AND b.OrderType = &apos;매수&apos; AND b.`Status` = &apos;요청중&apos;
-        ///WHERE a.orderType like &apos;현금매수%&apos; AND a.acceptType = &apos;주문완료&apos;
-        ///AND a.confirmNo &lt;&gt; &apos;&apos;
-        ///AND a.confirmQty &gt; 0 AND a.confirmPri [rest of string was truncated]&quot;;.
+        ///              LEFT OUTER JOIN tbl_stock_order c on a.orderNo = c.orderNo
+        ///WHERE a.orderType like &apos;현금매수%&apos; AND a.acceptT [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string 매수완료업데이트대상및매도대상조회 {
             get {
@@ -363,7 +363,8 @@ namespace WindowsFormsApp2.Properties {
         ///AND stockCode = &apos;{1}&apos;
         ///AND Qty = &apos;{2}&apos;
         ///and OrderType = &apos;매수&apos;
-        ///and Status = &apos;요청중&apos;.
+        ///and Status = &apos;요청중&apos;
+        ///and orderNo is null.
         /// </summary>
         internal static string 체결요청내역으로내주문업데이트 {
             get {
@@ -381,7 +382,8 @@ namespace WindowsFormsApp2.Properties {
         ///AND stockCode = &apos;{1}&apos;
         ///AND Qty = &apos;{2}&apos;
         ///and OrderType = &apos;매도&apos;
-        ///and Status = &apos;요청중&apos;.
+        ///and Status = &apos;요청중&apos;
+        ///and orderNo is null.
         /// </summary>
         internal static string 체결요청내역으로매도완료업데이트 {
             get {
