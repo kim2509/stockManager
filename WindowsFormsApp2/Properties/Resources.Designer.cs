@@ -99,6 +99,7 @@ namespace WindowsFormsApp2.Properties {
         ///, stockName
         ///, currentPrice
         ///, traffic
+        ///, 이전거래량
         ///, diffBefore
         ///, upDownRate
         ///, createdDate
@@ -112,6 +113,7 @@ namespace WindowsFormsApp2.Properties {
         ///,&apos;{4}&apos;
         ///,&apos;{5}&apos;
         ///,&apos;{6}&apos;
+        ///,&apos;{7}&apos;
         ///, NOW()
         ///).
         /// </summary>
@@ -178,11 +180,11 @@ namespace WindowsFormsApp2.Properties {
         ///, b.createdDate
         ///, b.updateDate
         ///FROM tbl_stock_myorderlist a
-        ///	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
-        ///		AND a.Qty = b.Qty AND a.Price = b.Price
+        ///	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.orderNo = b.orderNo 
         ///		AND b.OrderType = &apos;매도&apos; AND b.`Status` = &apos;요청중&apos;
-        ///              LEFT OUTER JOIN tbl_stock_order c on a.orderNo = c.orderNo
-        ///WHERE a.orderType like &apos;현금매도%&apos; AND a.acceptType = &apos; [rest of string was truncated]&quot;;.
+        ///WHERE a.orderType like &apos;현금매도%&apos; AND a.acceptType = &apos;주문완료&apos;
+        ///AND a.confirmNo &lt;&gt; &apos;&apos;
+        ///AND a.OrderDate = &apos;{0}&apos;.
         /// </summary>
         internal static string 매도완료업데이트대상조회 {
             get {
@@ -207,8 +209,9 @@ namespace WindowsFormsApp2.Properties {
         ///	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
         ///		AND a.confirmQty = b.Qty AND a.Price = b.Price
         ///		AND b.OrderType = &apos;매수&apos; AND b.`Status` = &apos;요청중&apos;
-        ///              LEFT OUTER JOIN tbl_stock_order c on a.orderNo = c.orderNo
-        ///WHERE a.orderType like &apos;현금매수%&apos; AND a.acceptT [rest of string was truncated]&quot;;.
+        ///WHERE a.orderType like &apos;현금매수%&apos; AND a.acceptType = &apos;주문완료&apos;
+        ///AND a.confirmNo &lt;&gt; &apos;&apos;
+        ///AND a.confirmQty &gt; 0 AND a.confirmPri [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string 매수완료업데이트대상및매도대상조회 {
             get {
@@ -241,6 +244,9 @@ namespace WindowsFormsApp2.Properties {
         /// <summary>
         ///   Looks up a localized string similar to update tbl_stock_target
         ///set status = &apos;매도요청중&apos;
+        ///, buyCnt = IFNULL(buyCnt,&apos;&apos;)
+        ///, qty = {2}
+        ///, balance = {3}
         ///where inqDate = &apos;{0}&apos; and stockCode = &apos;{1}&apos; and status = &apos;매수요청중&apos;.
         /// </summary>
         internal static string 주식상태매도요청중으로변경 {
@@ -356,15 +362,12 @@ namespace WindowsFormsApp2.Properties {
         /// <summary>
         ///   Looks up a localized string similar to UPDATE tbl_stock_order
         ///SET STATUS = &apos;완료&apos;
-        ///, orderNo = &apos;{3}&apos;
         ///, updateDate = NOW()
         ///, price = &apos;{4}&apos;
         ///WHERE inqDate = &apos;{0}&apos;
-        ///AND stockCode = &apos;{1}&apos;
-        ///AND Qty = &apos;{2}&apos;
+        ///AND orderNo = &apos;{3}&apos;
         ///and OrderType = &apos;매수&apos;
-        ///and Status = &apos;요청중&apos;
-        ///and orderNo is null.
+        ///and Status = &apos;요청중&apos;.
         /// </summary>
         internal static string 체결요청내역으로내주문업데이트 {
             get {
@@ -375,15 +378,12 @@ namespace WindowsFormsApp2.Properties {
         /// <summary>
         ///   Looks up a localized string similar to UPDATE tbl_stock_order
         ///SET STATUS = &apos;완료&apos;
-        ///, orderNo = &apos;{3}&apos;
         ///, updateDate = NOW()
         ///, price = &apos;{4}&apos;
         ///WHERE inqDate = &apos;{0}&apos;
-        ///AND stockCode = &apos;{1}&apos;
-        ///AND Qty = &apos;{2}&apos;
+        ///AND orderNo = &apos;{3}&apos;
         ///and OrderType = &apos;매도&apos;
-        ///and Status = &apos;요청중&apos;
-        ///and orderNo is null.
+        ///and Status = &apos;요청중&apos;.
         /// </summary>
         internal static string 체결요청내역으로매도완료업데이트 {
             get {

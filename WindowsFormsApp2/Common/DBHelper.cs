@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Dapper;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -19,6 +20,19 @@ namespace WindowsFormsApp2.Common
 
         }
 
+        public int LastInsertID()
+        {
+            string sql = "SELECT LAST_INSERT_ID();";
+
+            int result = 0;
+
+            using (var connection = connectionFactory())
+            {
+                result = Dapper.SqlMapper.ExecuteScalar<int>(connection, sql);
+                return result;
+            }
+        }
+
         public dynamic Query<T>(string sql)
         {
             //var db = connectionFactory();
@@ -33,6 +47,17 @@ namespace WindowsFormsApp2.Common
             return workers;
         }
 
+        public dynamic Query<T>(string spName, DynamicParameters p)
+        {
+            object result = null;
+            using (var connection = connectionFactory())
+            {
+                result = Dapper.SqlMapper.Query<T>(connection, spName, p, null, true, null, CommandType.StoredProcedure);
+            }
+
+            return result;
+        }
+
         public dynamic QuerySingle<T>(string sql)
         {
             //var db = connectionFactory();
@@ -42,6 +67,18 @@ namespace WindowsFormsApp2.Common
             using (var connection = connectionFactory())
             {
                 result = Dapper.SqlMapper.QuerySingleOrDefault<T>(connection, sql);
+            }
+
+            return result;
+        }
+
+        public dynamic QuerySingle<T>(string spName, DynamicParameters p)
+        {
+            object result = null;
+
+            using (var connection = connectionFactory())
+            {
+                result = Dapper.SqlMapper.QuerySingleOrDefault<T>(connection, spName, p, null, null, CommandType.StoredProcedure);
             }
 
             return result;
@@ -60,5 +97,19 @@ namespace WindowsFormsApp2.Common
 
             return result;
         }
+
+        public int Execute( string spName , DynamicParameters p)
+        {
+            int result = 0;
+
+            using (var connection = connectionFactory())
+            {
+                result = connection.Execute(spName, p, commandType: CommandType.StoredProcedure);
+            }
+
+            return result;
+        }
+
+        
     }
 }

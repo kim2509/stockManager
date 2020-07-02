@@ -138,6 +138,7 @@ inqDate
 , stockName
 , currentPrice
 , traffic
+, 이전거래량
 , diffBefore
 , upDownRate
 , createdDate
@@ -151,6 +152,7 @@ values
 ,'{4}'
 ,'{5}'
 ,'{6}'
+,'{7}'
 , NOW()
 )</value>
   </data>
@@ -193,15 +195,11 @@ a.orderNo
 , b.createdDate
 , b.updateDate
 FROM tbl_stock_myorderlist a
-	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
-		AND a.Qty = b.Qty AND a.Price = b.Price
+	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.orderNo = b.orderNo 
 		AND b.OrderType = '매도' AND b.`Status` = '요청중'
-              LEFT OUTER JOIN tbl_stock_order c on a.orderNo = c.orderNo
 WHERE a.orderType like '현금매도%' AND a.acceptType = '주문완료'
 AND a.confirmNo &lt;&gt; ''
-AND a.confirmQty &gt; 0 AND a.confirmPrice &gt; 0
-AND a.OrderDate = '{0}'
-AND c.orderNo IS NULL</value>
+AND a.OrderDate = '{0}'</value>
   </data>
   <data name="매수완료업데이트대상및매도대상조회" xml:space="preserve">
     <value>SELECT 
@@ -220,12 +218,10 @@ FROM tbl_stock_myorderlist a
 	INNER JOIN tbl_stock_order b ON a.orderDate = b.inqDate AND a.stockCode = b.stockCode 
 		AND a.confirmQty = b.Qty AND a.Price = b.Price
 		AND b.OrderType = '매수' AND b.`Status` = '요청중'
-              LEFT OUTER JOIN tbl_stock_order c on a.orderNo = c.orderNo
 WHERE a.orderType like '현금매수%' AND a.acceptType = '주문완료'
 AND a.confirmNo &lt;&gt; ''
 AND a.confirmQty &gt; 0 AND a.confirmPrice &gt; 0
-AND a.OrderDate = '{0}'
-and c.orderNo IS NULL</value>
+AND a.OrderDate = '{0}'</value>
   </data>
   <data name="종목현재가갱신" xml:space="preserve">
     <value>UPDATE tbl_stock_daily
@@ -240,6 +236,9 @@ where inqDate = '{0}' and stockCode = '{1}' and status = '매도요청중'</valu
   <data name="주식상태매도요청중으로변경" xml:space="preserve">
     <value>update tbl_stock_target
 set status = '매도요청중'
+, buyCnt = IFNULL(buyCnt,'')
+, qty = {2}
+, balance = {3}
 where inqDate = '{0}' and stockCode = '{1}' and status = '매수요청중'</value>
   </data>
   <data name="주식상태매수요청중으로변경" xml:space="preserve">
@@ -323,27 +322,21 @@ VALUES
   <data name="체결요청내역으로내주문업데이트" xml:space="preserve">
     <value>UPDATE tbl_stock_order
 SET STATUS = '완료'
-, orderNo = '{3}'
 , updateDate = NOW()
 , price = '{4}'
 WHERE inqDate = '{0}'
-AND stockCode = '{1}'
-AND Qty = '{2}'
+AND orderNo = '{3}'
 and OrderType = '매수'
-and Status = '요청중'
-and orderNo is null</value>
+and Status = '요청중'</value>
   </data>
   <data name="체결요청내역으로매도완료업데이트" xml:space="preserve">
     <value>UPDATE tbl_stock_order
 SET STATUS = '완료'
-, orderNo = '{3}'
 , updateDate = NOW()
 , price = '{4}'
 WHERE inqDate = '{0}'
-AND stockCode = '{1}'
-AND Qty = '{2}'
+AND orderNo = '{3}'
 and OrderType = '매도'
-and Status = '요청중'
-and orderNo is null</value>
+and Status = '요청중'</value>
   </data>
 </root>
