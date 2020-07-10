@@ -88,9 +88,18 @@ namespace WindowsFormsApp2.Data
         public string Price { get; set; }
         public string Status { get; set; }
         public string OrderType { get; set; }
+        public string OrderOption { get; set; }
         public string APIResult { get; set; }
         public string orgOrderNo { get; set; }
         public string createdDate { get; set; }
         public string updateDate { get; set; }
+    }
+
+    public class 종목증감정보
+    {
+        public string 종목코드 { get; set; }
+        public string 종목명 { get; set; }
+        public double 증가율 { get; set; }
+        public int 갯수 { get; set; }
     }
 }

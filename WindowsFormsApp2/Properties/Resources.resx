@@ -175,11 +175,9 @@ WHERE b.inqDate = '{0}'</value>
   <data name="금일매수대상종목조회" xml:space="preserve">
     <value>SELECT a.*
 FROM tbl_stock_target a
-	LEFT OUTER JOIN tbl_stock_order b ON a.inqDate = b.inqDate AND a.stockCode = b.stockCode AND b.Status = '요청중'
 WHERE a.inqDate = '{0}'
 and a.STATUS = '대기'
-AND b.stockCode IS NULL
-ORDER BY ABS(startPrice - currentPrice)</value>
+order by currentPrice - startPrice desc</value>
   </data>
   <data name="매도완료업데이트대상조회" xml:space="preserve">
     <value>SELECT 
@@ -325,6 +323,7 @@ SET STATUS = '완료'
 , updateDate = NOW()
 , price = '{4}'
 WHERE inqDate = '{0}'
+and stockCode = '{1}'
 AND orderNo = '{3}'
 and OrderType = '매수'
 and Status = '요청중'</value>

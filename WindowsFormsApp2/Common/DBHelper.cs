@@ -20,9 +20,9 @@ namespace WindowsFormsApp2.Common
 
         }
 
-        public int LastInsertID()
+        public int GetLastOrderSeq()
         {
-            string sql = "SELECT LAST_INSERT_ID();";
+            string sql = "select max(Seq) from tbl_stock_order;";
 
             int result = 0;
 

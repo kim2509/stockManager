@@ -154,11 +154,9 @@ namespace WindowsFormsApp2.Properties {
         /// <summary>
         ///   Looks up a localized string similar to SELECT a.*
         ///FROM tbl_stock_target a
-        ///	LEFT OUTER JOIN tbl_stock_order b ON a.inqDate = b.inqDate AND a.stockCode = b.stockCode AND b.Status = &apos;요청중&apos;
         ///WHERE a.inqDate = &apos;{0}&apos;
         ///and a.STATUS = &apos;대기&apos;
-        ///AND b.stockCode IS NULL
-        ///ORDER BY ABS(startPrice - currentPrice).
+        ///order by currentPrice - startPrice desc.
         /// </summary>
         internal static string 금일매수대상종목조회 {
             get {
@@ -365,6 +363,7 @@ namespace WindowsFormsApp2.Properties {
         ///, updateDate = NOW()
         ///, price = &apos;{4}&apos;
         ///WHERE inqDate = &apos;{0}&apos;
+        ///and stockCode = &apos;{1}&apos;
         ///AND orderNo = &apos;{3}&apos;
         ///and OrderType = &apos;매수&apos;
         ///and Status = &apos;요청중&apos;.

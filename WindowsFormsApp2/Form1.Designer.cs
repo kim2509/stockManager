@@ -54,12 +54,13 @@
             this.txtStockPrice = new System.Windows.Forms.TextBox();
             this.txtStockQty = new System.Windows.Forms.TextBox();
             this.btnSell = new System.Windows.Forms.Button();
-            this.alertListBox = new System.Windows.Forms.ListBox();
             this.btnJobStart = new System.Windows.Forms.Button();
             this.btnJobStop = new System.Windows.Forms.Button();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.lblStockCount = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.btnTestForm = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.axKHOpenAPI1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -72,6 +73,7 @@
             this.axKHOpenAPI1.Size = new System.Drawing.Size(122, 51);
             this.axKHOpenAPI1.TabIndex = 0;
             this.axKHOpenAPI1.OnReceiveTrData += new AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveTrDataEventHandler(this.axKHOpenAPI1_OnReceiveTrData);
+            this.axKHOpenAPI1.OnReceiveMsg += new AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveMsgEventHandler(this.axKHOpenAPI1_OnReceiveMsg);
             this.axKHOpenAPI1.OnReceiveChejanData += new AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveChejanDataEventHandler(this.axKHOpenAPI1_OnReceiveChejanData);
             this.axKHOpenAPI1.OnEventConnect += new AxKHOpenAPILib._DKHOpenAPIEvents_OnEventConnectEventHandler(this.axKHOpenAPI1_OnEventConnect);
             // 
@@ -291,15 +293,6 @@
             this.btnSell.UseVisualStyleBackColor = true;
             this.btnSell.Click += new System.EventHandler(this.btnSell_Click);
             // 
-            // alertListBox
-            // 
-            this.alertListBox.FormattingEnabled = true;
-            this.alertListBox.ItemHeight = 12;
-            this.alertListBox.Location = new System.Drawing.Point(410, 201);
-            this.alertListBox.Name = "alertListBox";
-            this.alertListBox.Size = new System.Drawing.Size(523, 232);
-            this.alertListBox.TabIndex = 20;
-            // 
             // btnJobStart
             // 
             this.btnJobStart.Location = new System.Drawing.Point(137, 8);
@@ -346,16 +339,37 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(137, 90);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(135, 19);
+            this.button3.TabIndex = 25;
+            this.button3.Text = "잔고정리";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // btnTestForm
+            // 
+            this.btnTestForm.Location = new System.Drawing.Point(382, 201);
+            this.btnTestForm.Name = "btnTestForm";
+            this.btnTestForm.Size = new System.Drawing.Size(135, 19);
+            this.btnTestForm.TabIndex = 26;
+            this.btnTestForm.Text = "TestForm";
+            this.btnTestForm.UseVisualStyleBackColor = true;
+            this.btnTestForm.Click += new System.EventHandler(this.btnTestForm_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1022, 648);
+            this.Controls.Add(this.btnTestForm);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.lblStockCount);
             this.Controls.Add(this.btnJobStop);
             this.Controls.Add(this.btnJobStart);
-            this.Controls.Add(this.alertListBox);
             this.Controls.Add(this.btnSell);
             this.Controls.Add(this.txtStockQty);
             this.Controls.Add(this.txtStockPrice);
@@ -417,12 +431,13 @@
         private System.Windows.Forms.TextBox txtStockPrice;
         private System.Windows.Forms.TextBox txtStockQty;
         private System.Windows.Forms.Button btnSell;
-        private System.Windows.Forms.ListBox alertListBox;
         private System.Windows.Forms.Button btnJobStart;
         private System.Windows.Forms.Button btnJobStop;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.Label lblStockCount;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btnTestForm;
     }
 }
 

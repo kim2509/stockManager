@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,7 +19,8 @@ namespace WindowsFormsApp2
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        Biz biz = new Biz();
+        Biz biz = null;
+        TRBiz trBiz = new TRBiz();
         DacStock dacStock = new DacStock();
         string inqDate = DateTime.Now.ToString("yyyyMMdd");
         //string orderDate = "20200517";
@@ -39,7 +41,9 @@ namespace WindowsFormsApp2
             {
                 if (e.nErrCode == 0)
                 {
-                    biz.OpenAPI = axKHOpenAPI1;
+                    biz = new Biz(axKHOpenAPI1);
+                    trBiz.OpenAPI = axKHOpenAPI1;
+                    biz.trBiz = trBiz;
 
                     string accountlist = axKHOpenAPI1.GetLoginInfo("ACCLIST");
                     string[] account = accountlist.Split(';');
@@ -104,117 +108,6 @@ namespace WindowsFormsApp2
                 axKHOpenAPI1.SetInputValue("조회구분", "1");
 
                 axKHOpenAPI1.CommRqData("계좌평가잔고내역요청", "opw00018", 0, "8100");
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private void axKHOpenAPI1_OnReceiveTrData(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveTrDataEvent e)
-        {
-            try
-            {
-                Console.WriteLine(e.sScrNo);
-                Console.WriteLine(e.sRQName);
-                Console.WriteLine(e.sTrCode);
-                Console.WriteLine(e.sRecordName);
-                Console.WriteLine(e.sPrevNext);
-
-                if (e.sRQName == "계좌평가잔고내역요청")
-                {
-                    long totalPurchase = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "총매입금액"));
-                    long totalEstimate = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "총평가금액"));
-                    long totalProfitLoss = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "총평가손익금액"));
-                    double totalProfitRate = double.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "총수익률(%)"));
-
-                    totalProfitRateLabel.Text = String.Format("{0:#,###}", totalPurchase);
-                    totalEstimateLabel.Text = String.Format("{0:#,###}", totalEstimate);
-                    totalProfitLabel.Text = String.Format("{0:#,###}", totalProfitLoss);
-                    lblProfitRate.Text = String.Format("{0:f2}", totalProfitRate);
-                }
-                else if (e.sRQName.Equals("예수금상세현황요청"))
-                {
-                    long lBalance = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "예수금"));
-                    string strBalance = String.Format("{0:#,###}", lBalance);
-                    MessageBox.Show(strBalance);
-                }
-                else if (e.sRQName.Equals("종목정보요청"))
-                {
-                    long stockPrice = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "현재가").Trim().Replace("-", ""));
-                    string stockName = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목명").Trim();
-                    long upDown = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "전일대비").Trim());
-                    long volume = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "거래량").Trim());
-                    string upDownRate = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "등락율").Trim();
-
-                    lblCurrentPrice.Text = String.Format("{0:#,###}", stockPrice);
-                    lblStockName.Text = stockName;
-                    lblDiffPrice.Text = String.Format("{0:#,###}", upDown);
-                    lblVolume.Text = String.Format("{0:#,###}", volume);
-                    if (upDown == 0)
-                    {
-                        lblDiffPrice.Text = "0";
-                    }
-                    if (volume == 0)
-                    {
-                        lblDiffPrice.Text = "0";
-                    }
-                    lblUpDownRate.Text = upDownRate + "%";
-
-                    StockDaily stockInfo = new StockDaily();
-                    stockInfo.inqDate = inqDate;
-
-                    dacStock.insertStockDaily(stockInfo);
-                }
-                else if (e.sRQName.Equals("종목정보요청Job"))
-                {
-                    string currentPrice = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "현재가").Trim().Replace("-", "");
-                    long stockPrice = long.Parse(string.IsNullOrEmpty(currentPrice.Trim()) ? "0" : currentPrice.Trim());
-                    string stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목코드").Trim();
-
-                    if (!string.IsNullOrWhiteSpace(stockCode))
-                    {
-                        string stockName = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목명").Trim();
-                        long upDown = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "전일대비").Trim());
-                        long volume = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "거래량").Trim());
-                        string upDownRate = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "등락율").Trim();
-
-                        StockDaily stockInfo = new StockDaily();
-                        stockInfo.inqDate = inqDate;
-                        stockInfo.stockCode = stockCode;
-                        stockInfo.stockName = stockName;
-                        stockInfo.currentPrice = stockPrice.ToString();
-                        stockInfo.diffBefore = upDown.ToString();
-                        stockInfo.traffic = volume.ToString();
-                        stockInfo.upDownRate = upDownRate;
-
-                        dacStock.insertStockDaily(stockInfo);
-                    }
-                }
-                else if (e.sRQName.Equals("거래량순조회"))
-                {
-                    biz.거래량순리스트조회처리(sender, e);
-                }
-                else if (e.sRQName.Equals("계좌별주문체결현황요청"))
-                {
-                    biz.계좌별주문체결현황요청응답처리(inqDate, sender, e, e.sPrevNext);
-                }
-                else if (e.sRQName.Equals("종목신규매수") || e.sRQName.Equals("신규종목매도주문") )
-                {
-                    string orderSeq = e.sScrNo;
-                    string orderNo = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "주문번호").Trim();
-
-                    Console.WriteLine(e.sRQName + " 주문번호: " + orderNo + " orderSeq:" + orderSeq );
-
-                    dacStock.주문정보업데이트(orderSeq, "", orderNo );
-                }
-                else if ( e.sRQName.Equals("매도정정요청") )
-                {
-                    string orderSeq = e.sScrNo;
-                    string orderNo = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "주문번호").Trim();
-                    Console.WriteLine(e.sRQName + " 주문번호: " + orderNo + " orderSeq:" + orderSeq);
-                }
 
             }
             catch (Exception ex)
@@ -308,6 +201,200 @@ namespace WindowsFormsApp2
             }
         }
 
+        private void axKHOpenAPI1_OnReceiveTrData(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveTrDataEvent e)
+        {
+            try
+            {
+                log.Info("axKHOpenAPI1_OnReceiveTrData start");
+
+                log.Info(e.sScrNo);
+                log.Info(e.sRQName);
+                log.Info(e.sTrCode);
+                log.Info(e.sRecordName);
+                log.Info(e.sPrevNext);
+
+                if (e.sRQName == "계좌평가잔고내역요청")
+                {
+                    long totalPurchase = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "총매입금액"));
+                    long totalEstimate = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "총평가금액"));
+                    long totalProfitLoss = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "총평가손익금액"));
+                    double totalProfitRate = double.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "총수익률(%)"));
+
+                    totalProfitRateLabel.Text = String.Format("{0:#,###}", totalPurchase);
+                    totalEstimateLabel.Text = String.Format("{0:#,###}", totalEstimate);
+                    totalProfitLabel.Text = String.Format("{0:#,###}", totalProfitLoss);
+                    lblProfitRate.Text = String.Format("{0:f2}", totalProfitRate);
+                }
+                else if (e.sRQName.Equals("예수금상세현황요청"))
+                {
+                    long lBalance = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "예수금"));
+                    string strBalance = String.Format("{0:#,###}", lBalance);
+                    MessageBox.Show(strBalance);
+                }
+                else if (e.sRQName.Equals("종목정보요청"))
+                {
+                    long stockPrice = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "현재가").Trim().Replace("-", ""));
+                    string stockName = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목명").Trim();
+                    long upDown = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "전일대비").Trim());
+                    long volume = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "거래량").Trim());
+                    string upDownRate = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "등락율").Trim();
+
+                    lblCurrentPrice.Text = String.Format("{0:#,###}", stockPrice);
+                    lblStockName.Text = stockName;
+                    lblDiffPrice.Text = String.Format("{0:#,###}", upDown);
+                    lblVolume.Text = String.Format("{0:#,###}", volume);
+                    if (upDown == 0)
+                    {
+                        lblDiffPrice.Text = "0";
+                    }
+                    if (volume == 0)
+                    {
+                        lblDiffPrice.Text = "0";
+                    }
+                    lblUpDownRate.Text = upDownRate + "%";
+
+                    StockDaily stockInfo = new StockDaily();
+                    stockInfo.inqDate = inqDate;
+
+                    dacStock.insertStockDaily(stockInfo);
+                }
+                else if (e.sRQName.Equals("종목정보요청Job"))
+                {
+                    string currentPrice = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "현재가").Trim().Replace("-", "");
+                    long stockPrice = long.Parse(string.IsNullOrEmpty(currentPrice.Trim()) ? "0" : currentPrice.Trim());
+                    string stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목코드").Trim();
+
+                    if (!string.IsNullOrWhiteSpace(stockCode))
+                    {
+                        string stockName = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목명").Trim();
+                        long upDown = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "전일대비").Trim());
+                        long volume = long.Parse(axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "거래량").Trim());
+                        string upDownRate = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "등락율").Trim();
+
+                        StockDaily stockInfo = new StockDaily();
+                        stockInfo.inqDate = inqDate;
+                        stockInfo.stockCode = stockCode;
+                        stockInfo.stockName = stockName;
+                        stockInfo.currentPrice = stockPrice.ToString();
+                        stockInfo.diffBefore = upDown.ToString();
+                        stockInfo.traffic = volume.ToString();
+                        stockInfo.upDownRate = upDownRate;
+
+                        dacStock.insertStockDaily(stockInfo);
+                    }
+                }
+                else if (e.sRQName.Equals("거래량순조회"))
+                {
+                    trBiz.거래량순리스트조회처리(sender, e);
+                }
+                else if (e.sRQName.Equals("계좌별주문체결현황요청"))
+                {
+                    trBiz.계좌별주문체결현황요청응답처리(inqDate, sender, e, e.sPrevNext);
+                }
+                else if (e.sRQName.Equals("종목신규매수") || e.sRQName.Equals("신규종목매도주문") || e.sRQName.Equals("매도취소요청"))
+                {
+                    string orderSeq = e.sScrNo;
+                    string orderNo = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "주문번호").Trim();
+                    string stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목코드").Trim();
+
+                    log.Info(e.sRQName + " 주문번호: " + orderNo + " orderSeq:" + orderSeq + " stockCode:" + stockCode );
+
+                    if (string.IsNullOrWhiteSpace(orderNo))
+                    {
+                        log.Error("주문번호가 없어 씨벌");
+                    }
+                    else
+                    {
+                        log.Error("주문번호업데이트!!");
+                        dacStock.주문번호업데이트_bySeq(orderSeq, orderNo);
+                    }
+                }
+                else if (e.sRQName.Equals("매도정정요청"))
+                {
+                    string orderSeq = e.sScrNo;
+                    string orderNo = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "주문번호").Trim();
+                    string stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목코드").Trim();
+
+                    log.Info(e.sRQName + " 주문번호: " + orderNo + " orderSeq:" + orderSeq + " stockCode:" + stockCode);
+
+                    dacStock.주문번호업데이트_bySeq(orderSeq, orderNo);
+                }
+                else if (e.sRQName.Equals("계좌평가현황요청"))
+                {
+                    int rowCount = axKHOpenAPI1.GetRepeatCnt(e.sTrCode, e.sRQName);
+
+                    for (int i = 0; i < rowCount; i++)
+                    {
+                        StockOrder stockInfo = new StockOrder();
+                        stockInfo.inqDate = inqDate;
+                        stockInfo.stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
+                        stockInfo.stockName = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
+
+                        if (stockInfo.stockCode.StartsWith("A"))
+                            stockInfo.stockCode = stockInfo.stockCode.Substring(1);
+
+                        stockInfo.Price = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "현재가").Trim();
+                        if (string.IsNullOrWhiteSpace(stockInfo.Price))
+                            stockInfo.Price = "0";
+
+                        int price = int.Parse(stockInfo.Price) - (int)(int.Parse(stockInfo.Price) * 0.02);
+
+                        stockInfo.Qty = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "보유수량").Trim();
+
+                        if (string.IsNullOrWhiteSpace(stockInfo.Qty))
+                            stockInfo.Qty = "0";
+
+                        int qty = int.Parse(stockInfo.Qty);
+
+                        axKHOpenAPI1.SendOrder("매도처리", "1234", comboBox1.SelectedItem.ToString(), 2, stockInfo.stockCode, qty, price, "00", "");
+
+                        Thread.Sleep(500);
+
+                        log.Info("잔고정리:" + JsonConvert.SerializeObject(stockInfo));
+                    }
+
+                }
+                else if (e.sRQName.Equals("실시간미체결요청"))
+                {
+                    trBiz.실시간미체결요청응답처리(sender, e);
+                }
+                else if (e.sRQName.Equals("당일거래량순조회") || "당일거래대금순조회".Equals(e.sRQName))
+                {
+                    trBiz.당일거래량상위응답처리(sender, e);
+                }
+                else if (e.sRQName.Equals("전일거래량순조회") || "전일거래대금순조회".Equals(e.sRQName))
+                {
+                    trBiz.전일거래량상위응답처리(sender, e);
+                }
+                else if (e.sRQName.Equals("종목현재가조회"))
+                {
+                    int rowCount = axKHOpenAPI1.GetRepeatCnt(e.sTrCode, e.sRQName);
+
+                    for (int i = 0; i < rowCount; i++)
+                    {
+                        string currentPrice = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "현재가").Trim();
+                        string stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
+                        string stockName = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
+
+                        currentPrice = currentPrice.Replace("-", "").Replace("+", "");
+
+                        log.Info(string.Format("종목현재가조회 종목코드:{0} 종목명:{1} 현재가:{2}", stockCode, stockName, currentPrice));
+
+                        dacStock.현재가갱신(inqDate, stockCode, currentPrice);
+                        dacStock.종목가격변동내역추가(inqDate, stockCode, stockName, currentPrice);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex);
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                log.Info("axKHOpenAPI1_OnReceiveTrData end");
+            }
+        }
         private void axKHOpenAPI1_OnReceiveChejanData(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveChejanDataEvent e)
         {
             try
@@ -316,10 +403,10 @@ namespace WindowsFormsApp2
 
                 if (e.sGubun == "0")//주문 접수 , 체결시
                 {
-                    alertListBox.Items.Add("계좌번호 : " + axKHOpenAPI1.GetChejanData(9201) + " | " + " 주문번호 : " + axKHOpenAPI1.GetChejanData(9203));
-                    alertListBox.Items.Add("주문상태 : " + axKHOpenAPI1.GetChejanData(913) + " | " + " 종목명 : " + axKHOpenAPI1.GetChejanData(302));
-                    alertListBox.Items.Add("종목코드 : " + axKHOpenAPI1.GetChejanData(9001) + " | " + " 원주문번호 : " + axKHOpenAPI1.GetChejanData(904));
-                    alertListBox.Items.Add("매매구분" + axKHOpenAPI1.GetChejanData(906) + " | " + " 주문수량 : " + axKHOpenAPI1.GetChejanData(900));
+                    //alertListBox.Items.Add("계좌번호 : " + axKHOpenAPI1.GetChejanData(9201) + " | " + " 주문번호 : " + axKHOpenAPI1.GetChejanData(9203));
+                    //alertListBox.Items.Add("주문상태 : " + axKHOpenAPI1.GetChejanData(913) + " | " + " 종목명 : " + axKHOpenAPI1.GetChejanData(302));
+                    //alertListBox.Items.Add("종목코드 : " + axKHOpenAPI1.GetChejanData(9001) + " | " + " 원주문번호 : " + axKHOpenAPI1.GetChejanData(904));
+                    //alertListBox.Items.Add("매매구분" + axKHOpenAPI1.GetChejanData(906) + " | " + " 주문수량 : " + axKHOpenAPI1.GetChejanData(900));
 
                     string orderTime = axKHOpenAPI1.GetChejanData(908);
                     string orderHour = orderTime[0] + "" + orderTime[1];
@@ -327,10 +414,10 @@ namespace WindowsFormsApp2
                     string orderSecond = orderTime[4] + "" + orderTime[5];
                     long orderPrice = long.Parse(axKHOpenAPI1.GetChejanData(901));
 
-                    alertListBox.Items.Add("주문/체결시간 : " + orderHour + "시 " + orderMinute + "분 " + orderSecond + "초");
-                    alertListBox.Items.Add("주문구분 : " + axKHOpenAPI1.GetChejanData(905));
-                    alertListBox.Items.Add("주문가격 : " + String.Format("{0:#,###}", orderPrice));
-                    alertListBox.Items.Add("----------------------------------------------------------");
+                    //alertListBox.Items.Add("주문/체결시간 : " + orderHour + "시 " + orderMinute + "분 " + orderSecond + "초");
+                    //alertListBox.Items.Add("주문구분 : " + axKHOpenAPI1.GetChejanData(905));
+                    //alertListBox.Items.Add("주문가격 : " + String.Format("{0:#,###}", orderPrice));
+                    //alertListBox.Items.Add("----------------------------------------------------------");
 
                     log.Info("계좌번호 : " + axKHOpenAPI1.GetChejanData(9201) + " | " + " 주문번호 : " + axKHOpenAPI1.GetChejanData(9203));
                     log.Info("주문상태 : " + axKHOpenAPI1.GetChejanData(913) + " | " + " 종목명 : " + axKHOpenAPI1.GetChejanData(302));
@@ -341,23 +428,21 @@ namespace WindowsFormsApp2
                     log.Info("주문가격 : " + String.Format("{0:#,###}", orderPrice));
                     log.Info("----------------------------------------------------------");
 
-                    string stockCode = axKHOpenAPI1.GetChejanData(9001).Trim();
-                    if (stockCode.StartsWith("A"))
-                        stockCode = stockCode.Substring(1);
+                    //string stockCode = axKHOpenAPI1.GetChejanData(9001).Trim();
+                    //if (stockCode.StartsWith("A"))
+                    //    stockCode = stockCode.Substring(1);
 
-                    string orderType = axKHOpenAPI1.GetChejanData(905).Trim().Replace("+","").Replace("-","");
-                    string qty = axKHOpenAPI1.GetChejanData(900).Trim();
-                    string price = axKHOpenAPI1.GetChejanData(901).Trim();
-                    string orderNo = axKHOpenAPI1.GetChejanData(9203).Trim();
+                    //string orderType = axKHOpenAPI1.GetChejanData(905).Trim().Replace("+","").Replace("-","");
+                    //string qty = axKHOpenAPI1.GetChejanData(900).Trim();
+                    //string price = axKHOpenAPI1.GetChejanData(901).Trim();
+                    //string orderNo = axKHOpenAPI1.GetChejanData(9203).Trim();
 
-                    if (axKHOpenAPI1.GetChejanData(913).Trim().Equals("접수"))
-                    {
-                        log.Info("주문번호업데이트 : " + inqDate + " 종목:" + stockCode + " 수량:" + qty + " 가격:" + price );
-                        dacStock.주문번호업데이트(inqDate, stockCode, orderType, orderNo, qty, price );
-                    }
+                    //if (axKHOpenAPI1.GetChejanData(913).Trim().Equals("접수"))
+                    //{
+                    //    log.Info("주문번호업데이트 : " + inqDate + " 종목:" + stockCode + " 수량:" + qty + " 가격:" + price );
+                    //    dacStock.주문번호업데이트(inqDate, stockCode, orderType, orderNo, qty, price );
+                    //}
                 }
-
-                
             }
             catch (Exception ex)
             {
@@ -370,6 +455,23 @@ namespace WindowsFormsApp2
             }
         }
 
+        private void axKHOpenAPI1_OnReceiveMsg(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveMsgEvent e)
+        {
+            try
+            {
+                log.Info("axKHOpenAPI1_OnReceiveMsg start");
+                log.Info("sRQName:" + e.sRQName + " sTrCode:" + e.sTrCode + " sScrNo:" + e.sScrNo + " sMsg:" + e.sMsg );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                log.Info("axKHOpenAPI1_OnReceiveMsg end");
+            }
+        }
+
         /// <summary>
         /// 자동 프로그램 매매 시작
         /// </summary>
@@ -379,7 +481,7 @@ namespace WindowsFormsApp2
         {
             try
             {
-                if ( string.IsNullOrWhiteSpace(biz.AccountNo))
+                if ( string.IsNullOrWhiteSpace(Biz.AccountNo))
                 {
                     if ( comboBox1.SelectedItem == null || string.IsNullOrWhiteSpace(comboBox1.SelectedItem.ToString() ))
                     {
@@ -387,7 +489,7 @@ namespace WindowsFormsApp2
                         return;
                     }
 
-                    biz.AccountNo = comboBox1.SelectedItem.ToString();
+                    Biz.AccountNo = comboBox1.SelectedItem.ToString();
                 }
 
                 this.backgroundWorker1.RunWorkerAsync(10000);
@@ -485,5 +587,39 @@ namespace WindowsFormsApp2
         }
 
         #endregion
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                // 계좌번호 = 전문 조회할 보유계좌번호
+                axKHOpenAPI1.SetInputValue("계좌번호", comboBox1.SelectedItem.ToString());
+
+                //비밀번호 = 사용안함(공백)
+                axKHOpenAPI1.SetInputValue("비밀번호", "");
+
+                // 상장폐지조회구분 = 0:전체, 1:상장폐지종목제외
+                axKHOpenAPI1.SetInputValue("상장폐지조회구분", "0");
+
+                // 비밀번호입력매체구분 = 00
+                axKHOpenAPI1.SetInputValue("비밀번호입력매체구분", "00");
+
+
+                int result = axKHOpenAPI1.CommRqData("계좌평가현황요청", "OPW00004", 0, "1234");
+            } catch ( Exception ex )
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void btnTestForm_Click(object sender, EventArgs e)
+        {
+            TestForm form = new TestForm();
+            form.OpenAPI = axKHOpenAPI1;
+            form.trBiz = trBiz;
+            form.biz = biz;
+            form.Show();
+        }
     }
 }

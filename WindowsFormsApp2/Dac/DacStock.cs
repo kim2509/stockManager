@@ -75,7 +75,7 @@ namespace WindowsFormsApp2.Dac
             return Execute("SP_당일거래량순종목추가", p);
         }
 
-        public int 현재가갱신(string inqDate, StockDaily stockInfo)
+        public int 현재가갱신(string inqDate, string StockCode, string CurrentPrice)
         {
             //string query = Properties.Resources.종목현재가갱신;
             //query = string.Format(query, inqDate, stockInfo.stockCode, stockInfo.currentPrice );
@@ -83,8 +83,8 @@ namespace WindowsFormsApp2.Dac
 
             DynamicParameters p = new DynamicParameters();
             p.Add("@조회일자", inqDate);
-            p.Add("@종목코드", stockInfo.stockCode);
-            p.Add("@현재가", stockInfo.currentPrice);
+            p.Add("@종목코드", StockCode);
+            p.Add("@현재가", CurrentPrice);
 
             return Execute("SP_종목현재가갱신_보유종목평가금액갱신", p);
         }
@@ -112,6 +112,14 @@ namespace WindowsFormsApp2.Dac
             return Execute(query);
         }
 
+        public List<StockTarget> 당일대상조회(string inqDate, string stockCode)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+            p.Add("@종목코드", stockCode);
+            return Query<StockTarget>("SP_당일대상조회", p);
+        }
+
         public List<StockTarget> 금일매수대상목록조회(string inqDate)
         {
             string query = Properties.Resources.금일매수대상종목조회;
@@ -126,23 +134,24 @@ namespace WindowsFormsApp2.Dac
             return Query<StockTarget>("SP_매도요청중인종목전체조회", p);
         }
 
-        public int 주식상태매수요청중으로변경(string inqDate, StockTarget target)
+        public int 주식상태매수요청중으로변경(string inqDate, string stockCode)
         {
             string query = Properties.Resources.주식상태매수요청중으로변경;
-            query = string.Format(query, inqDate, target.stockCode);
+            query = string.Format(query, inqDate, stockCode);
             return Execute(query);
         }
 
-        public int 주식상태매도요청중으로변경(string inqDate, StockOrder order, int 매수수량, int 매수금액 )
+        public int 주식상태매도요청중으로변경(string inqDate, string stockCode, int 매수수량, int 매수금액, string 추가매수여부 )
         {
             //string query = Properties.Resources.주식상태매도요청중으로변경;
             //query = string.Format(query, inqDate, order.stockCode, 매수한수량, 매수한금액);
 
             DynamicParameters p = new DynamicParameters();
             p.Add("@조회일자", inqDate);
-            p.Add("@종목코드", order.stockCode);
+            p.Add("@종목코드", stockCode);
             p.Add("@매수수량_1", 매수수량);
             p.Add("@매입단가_1", 매수금액);
+            p.Add("@추가매수여부", 추가매수여부);
 
             return Execute("SP_매수완료처리_매도요청중으로변경", p);
         }
@@ -242,13 +251,14 @@ namespace WindowsFormsApp2.Dac
             p.Add("@주문수량", stockOrder.Qty);
             p.Add("@주문단가", stockOrder.Price);
             p.Add("@주문타입", stockOrder.OrderType);
+            p.Add("@주문옵션", stockOrder.OrderOption);
             p.Add("@주문상태", stockOrder.Status);
             p.Add("@APIResult", stockOrder.APIResult);
             p.Add("@원주문번호", stockOrder.orgOrderNo);
 
             Execute("SP_주문이력추가", p);
 
-            return LastInsertID();
+            return GetLastOrderSeq();
         }
 
         public List<StockOrder> 매수완료업데이트대상및매도대상조회(string inqDate)
@@ -256,6 +266,17 @@ namespace WindowsFormsApp2.Dac
             string query = Properties.Resources.매수완료업데이트대상및매도대상조회;
             query = string.Format(query, inqDate);
             return Query<StockOrder>(query);
+        }
+
+        public List<StockOrder> tbl_stock_order_주문조회(string inqDate, string stockCode, string OrderType, string Status )
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+            p.Add("@종목코드", stockCode);
+            p.Add("@주문타입", OrderType);
+            p.Add("@상태", Status);
+
+            return Query<StockOrder>("SP_tbl_stock_order_주문조회", p);
         }
 
         public int 체결요청내역으로내주문업데이트(StockOrder stockOrder)
@@ -266,7 +287,7 @@ namespace WindowsFormsApp2.Dac
             return Execute(query);
         }
 
-        public List<StockOrder> 매도완료업데이트대상조회(string inqDate)
+        public List<StockMyOrder> 매도완료업데이트대상조회(string inqDate)
         {
             //string query = Properties.Resources.매도완료업데이트대상조회;
             //query = string.Format(query, inqDate);
@@ -275,27 +296,33 @@ namespace WindowsFormsApp2.Dac
             DynamicParameters p = new DynamicParameters();
             p.Add("@조회일자", inqDate);
 
-            return Query<StockOrder>("SP_매도완료업데이트대상조회", p);
+            return Query<StockMyOrder>("SP_매도완료업데이트대상조회", p);
         }
 
-        public int 체결요청내역으로매도완료업데이트(StockOrder stockOrder)
+        public int 주문정보업데이트(string orderSeq, string orderNo, string qty, string price, string orderType, string status, string apiResult )
         {
-            string query = Properties.Resources.체결요청내역으로매도완료업데이트;
-            query = string.Format(query, stockOrder.inqDate, stockOrder.stockCode, stockOrder.Qty
-                , stockOrder.orderNo, stockOrder.Price);
-            return Execute(query);
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@orderSeq", orderSeq);
+            p.Add("@주문번호", orderNo);
+            p.Add("@수량", qty);
+            p.Add("@가격", price);
+            p.Add("@주문타입", orderType);
+            p.Add("@주문상태", status);
+            p.Add("@APIResult_1", apiResult);
+
+            return Execute("SP_tbl_stock_order_주문정보업데이트", p);
         }
 
-        public StockOrder 매도요청중인주문한종목조회(string inqDate, StockTarget stockTarget)
+        public StockOrder 매도요청중인주문한종목조회(string inqDate, string stockCode)
         {
             DynamicParameters p = new DynamicParameters();
             p.Add("@조회일자", inqDate);
-            p.Add("@종목코드", stockTarget.stockCode);
+            p.Add("@종목코드", stockCode);
 
             return QuerySingle<StockOrder>("SP_매도요청중인주문한종목조회", p);
         }
 
-        public int 주문정보업데이트( string OrderSeq, string APIResult, string 주문번호 )
+        public int 주문정보업데이트( string OrderSeq, string APIResult, string 주문번호, string 종목코드 = "" )
         {
             //string query = Properties.Resources.종목현재가갱신;
             //query = string.Format(query, inqDate, stockInfo.stockCode, stockInfo.currentPrice );
@@ -305,8 +332,27 @@ namespace WindowsFormsApp2.Dac
             p.Add("@orderSeq", OrderSeq);
             p.Add("@API결과", APIResult);
             p.Add("@주문번호", 주문번호 );
+            p.Add("@종목코드", 종목코드);
 
             return Execute("SP_주문정보업데이트", p);
+        }
+
+        public int 주문번호업데이트_bySeq(string OrderSeq, string 주문번호)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@orderSeq", OrderSeq);
+            p.Add("@주문번호", 주문번호);
+
+            return Execute("SP_주문번호업데이트_bySeq", p);
+        }
+
+        public int 주문상태변경(string OrderSeq, string orderStatus)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@orderSeq", OrderSeq);
+            p.Add("@orderStatus", orderStatus);
+
+            return Execute("SP_주문상태변경", p);
         }
 
         public int 매도정정내역으로주문업데이트(StockMyOrder stockOrder)
@@ -354,6 +400,63 @@ namespace WindowsFormsApp2.Dac
             return Execute("SP_종목가격변동내역추가", p);
         }
 
+        public 종목증감정보 종목최근등락률조회(string inqDate, string stockCode)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자_1", inqDate);
+            p.Add("@종목코드_1", stockCode);
+
+            return QuerySingle<종목증감정보>("SP_종목최근등락률조회", p);
+        }
+
         #endregion
+
+
+        public int 당일장후시간외_거래량거래대금순조회(string inqDate, string 종목코드, string 종목명, string 현재가, string 전일대비기호, string 전일대비
+            , string 등락률, string 거래량, string 전일비, string 거래회전율, string 거래금액, string flag, string 장운영구분)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+            p.Add("@종목코드_1", 종목코드);
+            p.Add("@종목명_1", 종목명);
+            p.Add("@현재가_1", 현재가);
+            p.Add("@전일대비기호_1", 전일대비기호);
+            p.Add("@전일대비_1", 전일대비);
+            p.Add("@등락률_1", 등락률);
+            p.Add("@거래량_1", 거래량);
+            p.Add("@전일비_1", 전일비);
+            p.Add("@거래회전율_1", 거래회전율);
+            p.Add("@거래금액_1", 거래금액);
+            p.Add("@flag", flag);
+            p.Add("@장운영구분_1", 장운영구분);
+
+            return Execute("SP_당일장후시간외_거래량거래대금순조회", p);
+        }
+
+        public int 당일거래대상설정(string srcInqDate, string destInqDate, string 장운영구분)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@srcInqDate", srcInqDate);
+            p.Add("@destInqDate", destInqDate);
+            p.Add("@장운영구분_1", 장운영구분);
+
+            return Execute("SP_금일대상설정", p);
+        }
+
+        public int 전일_거래량거래대금순조회(string inqDate, string 종목코드, string 종목명, string 현재가, string 전일대비기호, string 전일대비
+            , string 거래량, string flag)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+            p.Add("@종목코드_1", 종목코드);
+            p.Add("@종목명_1", 종목명);
+            p.Add("@현재가_1", 현재가);
+            p.Add("@전일대비기호_1", 전일대비기호);
+            p.Add("@전일대비_1", 전일대비);
+            p.Add("@거래량_1", 거래량);
+            p.Add("@flag", flag);
+
+            return Execute("SP_전일_거래량거래대금순조회", p);
+        }
     }
 }
