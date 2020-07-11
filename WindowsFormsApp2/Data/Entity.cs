@@ -102,4 +102,9 @@ namespace WindowsFormsApp2.Data
         public double 증가율 { get; set; }
         public int 갯수 { get; set; }
     }
+
+    public class 종목실시간정보
+    {
+        public string 종목명 { get; set; }
+    }
 }

@@ -37,6 +37,27 @@ namespace WindowsFormsApp2.Common
             return resultCode;
         }
 
+        public string GetCommData( string sTrCode, string sRQName, int index, string fieldName )
+        {
+            return OpenAPI.GetCommData(sTrCode, sRQName, index, fieldName);
+        }
+
+        public int CommKwRqData( string sArrCode, int bNext, int nCodeCount, int nTypeFlag, string sRQName, string sScreenNo )
+        {
+            mut.WaitOne();
+
+            int resultCode = OpenAPI.CommKwRqData(sArrCode, bNext, nCodeCount, nTypeFlag, sRQName, sScreenNo);
+            Thread.Sleep(500);
+
+            mut.ReleaseMutex();
+
+            return resultCode;
+        }
+
+        public int GetRepeatCnt( string sTrCode, string sRQName )
+        {
+            return OpenAPI.GetRepeatCnt(sTrCode, sRQName);
+        }
 
         public int SendOrder( string sRQName, string sScreenNo, string sAccNo, int nOrderType, string sCode, int nQty, int nPrice, string sHogaGbn, string sOrgOrderNo)
         {
@@ -56,9 +77,7 @@ namespace WindowsFormsApp2.Common
                 + " price:" + price.ToString() + " qty:" + qty.ToString());
 
             // 매도정정요청
-            int resultCode = OpenAPI.SendOrder("매도취소요청", orderSeq.ToString(), accountNo, 4, stockCode, Util.GetInt(qty), Util.GetInt(price) , "00", orgOrderNo);
-
-            Thread.Sleep(500);
+            int resultCode = SendOrder("매도취소요청", orderSeq.ToString(), accountNo, 4, stockCode, Util.GetInt(qty), Util.GetInt(price) , "00", orgOrderNo);
 
             log.Info("매도취소요청 resultCode:" + resultCode.ToString());
 

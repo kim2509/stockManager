@@ -20,10 +20,11 @@ namespace WindowsFormsApp2
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         Biz biz = null;
-        TRBiz trBiz = new TRBiz();
+        TRBiz trBiz = null;
         DacStock dacStock = new DacStock();
         string inqDate = DateTime.Now.ToString("yyyyMMdd");
         //string orderDate = "20200517";
+        APIManager apiManager = null;
 
         public Form1()
         {
@@ -32,7 +33,9 @@ namespace WindowsFormsApp2
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            apiManager = new APIManager(axKHOpenAPI1);
             axKHOpenAPI1.CommConnect();
+            trBiz = new TRBiz(apiManager);
         }
 
         private void axKHOpenAPI1_OnEventConnect(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnEventConnectEvent e)
@@ -41,8 +44,8 @@ namespace WindowsFormsApp2
             {
                 if (e.nErrCode == 0)
                 {
-                    biz = new Biz(axKHOpenAPI1);
-                    trBiz.OpenAPI = axKHOpenAPI1;
+                    
+                    biz = new Biz(apiManager);
                     biz.trBiz = trBiz;
 
                     string accountlist = axKHOpenAPI1.GetLoginInfo("ACCLIST");

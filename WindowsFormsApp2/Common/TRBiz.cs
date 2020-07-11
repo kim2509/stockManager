@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,9 +14,14 @@ namespace WindowsFormsApp2.Common
     public class TRBiz
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        public AxKHOpenAPILib.AxKHOpenAPI OpenAPI { get; set; }
+        public APIManager OpenAPI { get; set; }
         string inqDate = DateTime.Now.ToString("yyyyMMdd");
         DacStock dacStock = new DacStock();
+
+        public TRBiz(APIManager api)
+        {
+            OpenAPI = api;
+        }
 
         public void 거래량순조회()
         {

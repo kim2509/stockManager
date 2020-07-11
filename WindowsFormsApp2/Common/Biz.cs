@@ -18,16 +18,13 @@ namespace WindowsFormsApp2.Common
 
         bool bDoneStockCodeUpdate = false;
         bool bTestMode = true;
-        public AxKHOpenAPILib.AxKHOpenAPI OpenAPI { get; set; }
+        public APIManager OpenAPI { get; set; }
 
         public TRBiz trBiz = null;
-        public APIManager apiManager = null;
 
-        public Biz(AxKHOpenAPILib.AxKHOpenAPI api)
+        public Biz(APIManager api)
         {
             OpenAPI = api;
-            trBiz = new TRBiz();
-            apiManager = new APIManager(api);
         }
 
         public static string AccountNo { get; set; }
@@ -443,7 +440,7 @@ namespace WindowsFormsApp2.Common
 
                         StockOrder 매도요청중주문 = dacStock.tbl_stock_order_주문조회(order.inqDate, order.stockCode, "매도", "요청중")[0];
 
-                        int resultCode = apiManager.매도취소요청(AccountNo, 매도요청중주문.Seq, 매도요청중주문.orderNo, 매도요청중주문.stockCode, 매도요청중주문.stockName
+                        int resultCode = OpenAPI.매도취소요청(AccountNo, 매도요청중주문.Seq, 매도요청중주문.orderNo, 매도요청중주문.stockCode, 매도요청중주문.stockName
                             , 매도요청중주문.Qty, 매도요청중주문.Price);
 
                         //매도정정요청(order.inqDate, 매도요청중주문.orderNo, order.stockCode, order.stockName, int.Parse(order.Qty), int.Parse(order.Price));
