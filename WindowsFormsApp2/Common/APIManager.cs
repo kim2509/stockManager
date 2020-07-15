@@ -30,7 +30,7 @@ namespace WindowsFormsApp2.Common
             mut.WaitOne();
 
             int resultCode = OpenAPI.CommRqData(sRQName, sTRCode, nPrevNext, sScreenNo);
-            Thread.Sleep(500);
+            Thread.Sleep(700);
 
             mut.ReleaseMutex();
 
@@ -47,7 +47,7 @@ namespace WindowsFormsApp2.Common
             mut.WaitOne();
 
             int resultCode = OpenAPI.CommKwRqData(sArrCode, bNext, nCodeCount, nTypeFlag, sRQName, sScreenNo);
-            Thread.Sleep(500);
+            Thread.Sleep(700);
 
             mut.ReleaseMutex();
 
@@ -64,7 +64,7 @@ namespace WindowsFormsApp2.Common
             mut.WaitOne();
 
             int resultCode = OpenAPI.SendOrder(sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGbn, sOrgOrderNo);
-            Thread.Sleep(500);
+            Thread.Sleep(700);
 
             mut.ReleaseMutex();
 

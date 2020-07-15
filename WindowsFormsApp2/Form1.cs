@@ -371,21 +371,7 @@ namespace WindowsFormsApp2
                 }
                 else if (e.sRQName.Equals("종목현재가조회"))
                 {
-                    int rowCount = axKHOpenAPI1.GetRepeatCnt(e.sTrCode, e.sRQName);
-
-                    for (int i = 0; i < rowCount; i++)
-                    {
-                        string currentPrice = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "현재가").Trim();
-                        string stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
-                        string stockName = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
-
-                        currentPrice = currentPrice.Replace("-", "").Replace("+", "");
-
-                        log.Info(string.Format("종목현재가조회 종목코드:{0} 종목명:{1} 현재가:{2}", stockCode, stockName, currentPrice));
-
-                        dacStock.현재가갱신(inqDate, stockCode, currentPrice);
-                        dacStock.종목가격변동내역추가(inqDate, stockCode, stockName, currentPrice);
-                    }
+                    trBiz.종목현재가조회응답처리(sender, e);
                 }
             }
             catch (Exception ex)

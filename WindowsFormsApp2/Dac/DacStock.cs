@@ -389,13 +389,57 @@ namespace WindowsFormsApp2.Dac
 
         #region tbl_stock_price_history
 
-        public int 종목가격변동내역추가(string 조회일자, string 종목코드, string 종목명, string 현재가 )
+        public int 종목가격변동내역추가(string 조회일자, 종목실시간정보 item )
         {
             DynamicParameters p = new DynamicParameters();
             p.Add("@조회일자_1", 조회일자);
-            p.Add("@종목코드_1", 종목코드);
-            p.Add("@종목명_1", 종목명);
-            p.Add("@현재가_1", 현재가);
+            p.Add("@종목코드_1", item.종목코드);
+            p.Add("@종목명_1", item.종목명);
+            p.Add("@현재가_1", item.현재가);
+            p.Add("@기준가_1", item.기준가);
+            p.Add("@전일대비_1", item.전일대비);
+            p.Add("@전일대비기호_1", item.전일대비기호);
+            p.Add("@등락율_1", item.등락율);
+            p.Add("@거래량_1", item.거래량);
+            p.Add("@거래대금_1", item.거래대금);
+            p.Add("@체결량_1", item.체결량);
+            p.Add("@체결강도_1", item.체결강도);
+            p.Add("@전일거래량대비_1", item.전일거래량대비);
+            p.Add("@매도호가_1", item.매도호가);
+            p.Add("@매수호가_1", item.매수호가);
+            p.Add("@매도1차호가_1", item.매도1차호가);
+            p.Add("@매도2차호가_1", item.매도2차호가);
+            p.Add("@매도3차호가_1", item.매도3차호가);
+            p.Add("@매도4차호가_1", item.매도4차호가);
+            p.Add("@매도5차호가_1", item.매도5차호가);
+            p.Add("@매수1차호가_1", item.매수1차호가);
+            p.Add("@매수2차호가_1", item.매수2차호가);
+            p.Add("@매수3차호가_1", item.매수3차호가);
+            p.Add("@매수4차호가_1", item.매수4차호가);
+            p.Add("@매수5차호가_1", item.매수5차호가);
+            p.Add("@상한가_1", item.상한가);
+            p.Add("@하한가_1", item.하한가);
+            p.Add("@시가_1", item.시가);
+            p.Add("@고가_1", item.고가);
+            p.Add("@저가_1", item.저가);
+            p.Add("@종가_1", item.종가);
+            p.Add("@체결시간_1", item.체결시간);
+            p.Add("@예상체결가_1", item.예상체결가);
+            p.Add("@예상체결량_1", item.예상체결량);
+            p.Add("@자본금_1", item.자본금);
+            p.Add("@액면가_1", item.액면가);
+            p.Add("@시가총액_1", item.시가총액);
+            p.Add("@주식수_1", item.주식수);
+            p.Add("@호가시간_1", item.호가시간);
+            p.Add("@일자_1", item.일자);
+            p.Add("@우선매도잔량_1", item.우선매도잔량);
+            p.Add("@우선매수잔량_1", item.우선매수잔량);
+            p.Add("@우선매도건수_1", item.우선매도건수);
+            p.Add("@우선매수건수_1", item.우선매수건수);
+            p.Add("@총매도잔량_1", item.총매도잔량);
+            p.Add("@총매수잔량_1", item.총매수잔량);
+            p.Add("@총매도건수_1", item.총매도건수);
+            p.Add("@총매수건수_1", item.총매수건수);
 
             return Execute("SP_종목가격변동내역추가", p);
         }
@@ -407,6 +451,15 @@ namespace WindowsFormsApp2.Dac
             p.Add("@종목코드_1", stockCode);
 
             return QuerySingle<종목증감정보>("SP_종목최근등락률조회", p);
+        }
+
+        public 종목실시간정보 최근한종목가격변동내역조회( string inqDate, string stockCode )
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자_1", inqDate);
+            p.Add("@종목코드_1", stockCode);
+
+            return QuerySingle<종목실시간정보>("SP_최근한종목가격변동내역조회", p);
         }
 
         #endregion

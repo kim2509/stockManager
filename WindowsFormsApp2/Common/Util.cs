@@ -14,5 +14,12 @@ namespace WindowsFormsApp2.Common
 
             return int.Parse(number);
         }
+
+        public static double GetDouble(string number)
+        {
+            if (string.IsNullOrWhiteSpace(number)) return 0.0;
+
+            return double.Parse(number);
+        }
     }
 }

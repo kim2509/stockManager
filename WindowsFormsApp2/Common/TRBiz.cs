@@ -57,8 +57,6 @@ namespace WindowsFormsApp2.Common
                     dacStock.insertStockDaily(stockInfo);
                 else
                     dacStock.현재가갱신(inqDate, stockInfo.stockCode, stockInfo.currentPrice);
-
-                dacStock.종목가격변동내역추가(inqDate, stockInfo.stockCode, stockInfo.stockName, stockInfo.currentPrice);
             }
 
             // 매수대상리스트에 현재가 갱신
@@ -338,6 +336,74 @@ namespace WindowsFormsApp2.Common
 
             if ("2".Equals(e.sPrevNext))
                 전일거래량상위요청("전일거래량순조회".Equals(e.sRQName) ? "1" : "2", e.sPrevNext);
+        }
+
+        public void 종목현재가조회응답처리(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveTrDataEvent e)
+        {
+            log.Info("종목현재가조회응답처리 start");
+
+            int rowCount = OpenAPI.GetRepeatCnt(e.sTrCode, e.sRQName);
+
+            for (int i = 0; i < rowCount; i++)
+            {
+                종목실시간정보 item = new 종목실시간정보();
+
+                item.종목코드 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
+                item.종목명 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
+                item.현재가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "현재가").Trim();
+                item.현재가 = item.현재가.Replace("-", "");
+
+                item.기준가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "기준가").Trim();
+                item.전일대비 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "전일대비").Trim();
+                item.전일대비기호 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "전일대비기호").Trim();
+                item.등락율 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "등락율").Trim();
+                item.거래량 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "거래량").Trim();
+                item.거래대금 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "거래대금").Trim();
+                item.체결량 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "체결량").Trim();
+                item.체결강도 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "체결강도").Trim();
+                item.전일거래량대비 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "전일거래량대비").Trim();
+                item.매도호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매도호가").Trim();
+                item.매수호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매수호가").Trim();
+                item.매도1차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매도1차호가").Trim();
+                item.매도2차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매도2차호가").Trim();
+                item.매도3차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매도3차호가").Trim();
+                item.매도4차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매도4차호가").Trim();
+                item.매도5차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매도5차호가").Trim();
+                item.매수1차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매수1차호가").Trim();
+                item.매수2차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매수2차호가").Trim();
+                item.매수3차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매수3차호가").Trim();
+                item.매수4차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매수4차호가").Trim();
+                item.매수5차호가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "매수5차호가").Trim();
+                item.상한가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "상한가").Trim();
+                item.하한가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "하한가").Trim();
+                item.시가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "시가").Trim();
+                item.고가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "고가").Trim();
+                item.저가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "저가").Trim();
+                item.종가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "종가").Trim();
+                item.체결시간 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "체결시간").Trim();
+                item.예상체결가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "예상체결가").Trim();
+                item.예상체결량 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "예상체결량").Trim();
+                item.자본금 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "자본금").Trim();
+                item.액면가 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "액면가").Trim();
+                item.시가총액 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "시가총액").Trim();
+                item.주식수 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "주식수").Trim();
+                item.호가시간 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "호가시간").Trim();
+                item.일자 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "일자").Trim();
+                item.우선매도잔량 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "우선매도잔량").Trim();
+                item.우선매수잔량 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "우선매수잔량").Trim();
+                item.우선매도건수 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "우선매도건수").Trim();
+                item.우선매수건수 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "우선매수건수").Trim();
+                item.총매도잔량 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "총매도잔량").Trim();
+                item.총매수잔량 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "총매수잔량").Trim();
+                item.총매도건수 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "총매도건수").Trim();
+                item.총매수건수 = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "총매수건수").Trim();
+
+                dacStock.현재가갱신(inqDate, item.종목코드, item.현재가);
+
+                dacStock.종목가격변동내역추가(inqDate, item);
+            }
+
+            log.Info("종목현재가조회응답처리 end");
         }
     }
 }

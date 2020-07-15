@@ -100,11 +100,66 @@ namespace WindowsFormsApp2.Data
         public string 종목코드 { get; set; }
         public string 종목명 { get; set; }
         public double 증가율 { get; set; }
+        public double 체결강도증가율 { get; set; }
+        public double 총매도잔량증가율 { get; set; }
+        public double 총매수잔량증가율 { get; set; }
         public int 갯수 { get; set; }
     }
 
     public class 종목실시간정보
     {
+        public string 종목코드 { get; set; }
         public string 종목명 { get; set; }
+        public string 현재가 { get; set; }
+        public string 실시간현재가등락률 { get; set; }
+        public string 등락률변동률 { get; set; }
+        public string 기준가 { get; set; }
+        public string 전일대비 { get; set; }
+        public string 전일대비기호 { get; set; }
+        public string 등락율 { get; set; }
+        public string 거래량 { get; set; }
+        public string 거래대금 { get; set; }
+        public string 체결량 { get; set; }
+        public string 체결강도 { get; set; }
+        public string 체결강도등락률 { get; set; }
+        public string 전일거래량대비 { get; set; }
+        public string 매도호가 { get; set; }
+        public string 매수호가 { get; set; }
+        public string 매도1차호가 { get; set; }
+        public string 매도2차호가 { get; set; }
+        public string 매도3차호가 { get; set; }
+        public string 매도4차호가 { get; set; }
+        public string 매도5차호가 { get; set; }
+        public string 매수1차호가 { get; set; }
+        public string 매수2차호가 { get; set; }
+        public string 매수3차호가 { get; set; }
+        public string 매수4차호가 { get; set; }
+        public string 매수5차호가 { get; set; }
+        public string 상한가 { get; set; }
+        public string 하한가 { get; set; }
+        public string 시가 { get; set; }
+        public string 고가 { get; set; }
+        public string 저가 { get; set; }
+        public string 종가 { get; set; }
+        public string 체결시간 { get; set; }
+        public string 예상체결가 { get; set; }
+        public string 예상체결량 { get; set; }
+        public string 자본금 { get; set; }
+        public string 액면가 { get; set; }
+        public string 시가총액 { get; set; }
+        public string 주식수 { get; set; }
+        public string 호가시간 { get; set; }
+        public string 일자 { get; set; }
+        public string 우선매도잔량 { get; set; }
+        public string 우선매수잔량 { get; set; }
+        public string 우선매도건수 { get; set; }
+        public string 우선매수건수 { get; set; }
+        public string 총매도잔량 { get; set; }
+        public string 총매수잔량 { get; set; }
+        public string 총매도잔량등락률 { get; set; }
+        public string 총매수잔량등락률 { get; set; }
+        public string 총매도건수 { get; set; }
+        public string 총매수건수 { get; set; }
+        public string createdDate { get; set; }
     }
 }
