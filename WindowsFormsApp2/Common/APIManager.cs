@@ -11,6 +11,7 @@ namespace WindowsFormsApp2.Common
     public class APIManager
     {
         private static Mutex mut = new Mutex();
+        int delay = 1000;
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -29,8 +30,9 @@ namespace WindowsFormsApp2.Common
         {
             mut.WaitOne();
 
+            log.Info(string.Format("API호출 RQName: {0}, trCode: {1}, screenNo : {2} ", sRQName, sTRCode, sScreenNo ));
             int resultCode = OpenAPI.CommRqData(sRQName, sTRCode, nPrevNext, sScreenNo);
-            Thread.Sleep(700);
+            Thread.Sleep(delay);
 
             mut.ReleaseMutex();
 
@@ -46,8 +48,9 @@ namespace WindowsFormsApp2.Common
         {
             mut.WaitOne();
 
+            log.Info(string.Format("API호출 CommKwRqData RQName: {0}, screenNo : {1} ", sRQName, sScreenNo));
             int resultCode = OpenAPI.CommKwRqData(sArrCode, bNext, nCodeCount, nTypeFlag, sRQName, sScreenNo);
-            Thread.Sleep(700);
+            Thread.Sleep(delay);
 
             mut.ReleaseMutex();
 
@@ -63,8 +66,11 @@ namespace WindowsFormsApp2.Common
         {
             mut.WaitOne();
 
+            log.Info(string.Format("API호출 SendOrder nOrderType : {0} RQName: {1}, sAccNo: {2}, screenNo : {3}, stockCode: {4}, nQty: {5}, nPrice : {6}, orgOrderNo: {7}"
+                , nOrderType.ToString(), sRQName, sAccNo, sScreenNo, sCode, nQty.ToString(), nPrice.ToString(), sOrgOrderNo ));
+
             int resultCode = OpenAPI.SendOrder(sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGbn, sOrgOrderNo);
-            Thread.Sleep(700);
+            Thread.Sleep(delay);
 
             mut.ReleaseMutex();
 

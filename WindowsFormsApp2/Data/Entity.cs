@@ -38,6 +38,7 @@ namespace WindowsFormsApp2.Data
         public string currentPrice { get; set; }
         public string targetPrice { get; set; }
         public string status { get; set; }
+        public string 매도방식 { get; set; }
         public string minsElapsed { get; set; }
         public string buyCnt { get; set; }
         public string sellCnt { get; set; }
@@ -86,9 +87,12 @@ namespace WindowsFormsApp2.Data
         public string stockName { get; set; }
         public string Qty { get; set; }
         public string Price { get; set; }
+        public string ConfirmQty { get; set; }
+        public string ConfirmPrice { get; set; }
         public string Status { get; set; }
         public string OrderType { get; set; }
         public string OrderOption { get; set; }
+        public string Reason { get; set; }
         public string APIResult { get; set; }
         public string orgOrderNo { get; set; }
         public string createdDate { get; set; }
@@ -100,6 +104,8 @@ namespace WindowsFormsApp2.Data
         public string 종목코드 { get; set; }
         public string 종목명 { get; set; }
         public double 증가율 { get; set; }
+
+        public double 거래량증가율 { get; set; }
         public double 체결강도증가율 { get; set; }
         public double 총매도잔량증가율 { get; set; }
         public double 총매수잔량증가율 { get; set; }
@@ -118,6 +124,7 @@ namespace WindowsFormsApp2.Data
         public string 전일대비기호 { get; set; }
         public string 등락율 { get; set; }
         public string 거래량 { get; set; }
+        public string 거래량등락률 { get; set; }
         public string 거래대금 { get; set; }
         public string 체결량 { get; set; }
         public string 체결강도 { get; set; }
@@ -158,6 +165,8 @@ namespace WindowsFormsApp2.Data
         public string 총매수잔량 { get; set; }
         public string 총매도잔량등락률 { get; set; }
         public string 총매수잔량등락률 { get; set; }
+        public string 잔량비율 { get; set; }
+        public string 잔량비율등락률 { get; set; }
         public string 총매도건수 { get; set; }
         public string 총매수건수 { get; set; }
         public string createdDate { get; set; }

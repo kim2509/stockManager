@@ -78,6 +78,16 @@ namespace WindowsFormsApp2
 
                         biz.stockList.Add(code);
                     }
+
+                    Biz.AccountNo = comboBox1.SelectedItem.ToString();
+
+                    if ( string.IsNullOrEmpty( Biz.AccountNo ) )
+                    {
+                        log.Error("계좌가 존재하지 않음!!!");
+                        return;
+                    }
+
+                    this.backgroundWorker1.RunWorkerAsync(10000);
                 }
                 else
                     MessageBox.Show("연결오류");
@@ -479,6 +489,12 @@ namespace WindowsFormsApp2
                     }
 
                     Biz.AccountNo = comboBox1.SelectedItem.ToString();
+
+                    if ( string.IsNullOrWhiteSpace( Biz.AccountNo ) )
+                    {
+                        MessageBox.Show("계좌번호가 공백입니다.");
+                        return;
+                    }
                 }
 
                 this.backgroundWorker1.RunWorkerAsync(10000);

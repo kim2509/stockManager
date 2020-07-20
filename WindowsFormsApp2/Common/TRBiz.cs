@@ -64,11 +64,35 @@ namespace WindowsFormsApp2.Common
         }
 
         bool b체결현황요청중 = false;
+        DateTime 최종계좌주문별체결현황요청시간 = DateTime.MinValue;
+
         public int 계좌주문별체결현황요청(string sPrevNext = "0")
         {
             if ("0".Equals(sPrevNext) && b체결현황요청중) return -1;
 
-            if (string.IsNullOrWhiteSpace(Biz.AccountNo)) return -1;
+            if (string.IsNullOrWhiteSpace(Biz.AccountNo))
+            {
+                b체결현황요청중 = false;
+                return -1;
+            }
+
+            if ("0".Equals(sPrevNext))
+            {
+                if (최종계좌주문별체결현황요청시간 == DateTime.MinValue)
+                {
+                    최종계좌주문별체결현황요청시간 = DateTime.Now;
+                }
+                else if (DateTime.Now.AddSeconds(-5) <= 최종계좌주문별체결현황요청시간)
+                {
+                    b체결현황요청중 = false;
+                    return -1;
+                }
+                else
+                {
+                    최종계좌주문별체결현황요청시간 = DateTime.Now;
+                }
+            }
+            
 
             // 주문일자 = YYYYMMDD (20170101 연도4자리, 월 2자리, 일 2자리 형식)
             OpenAPI.SetInputValue("주문일자", inqDate);
@@ -95,11 +119,19 @@ namespace WindowsFormsApp2.Common
             OpenAPI.SetInputValue("조회구분", "1");
 
             OpenAPI.SetInputValue("종목코드", "");
-            OpenAPI.SetInputValue("시작주문번호", "");
+
+            string 마지막주문번호 = string.Empty;
+            StockMyOrder lastOrder = dacStock.동기화된마지막주문조회(inqDate);
+            if (lastOrder != null)
+                마지막주문번호 = lastOrder.orderNo;
+
+            log.Info("계좌별주문체결현황요청 마지막주문번호 : " + 마지막주문번호);
+
+            OpenAPI.SetInputValue("시작주문번호", 마지막주문번호);
 
             b체결현황요청중 = true;
 
-            return OpenAPI.CommRqData("계좌별주문체결현황요청", "opw00009", !"2".Equals(sPrevNext) ? 0 : 2, "1234");
+            return OpenAPI.CommRqData("계좌별주문체결현황요청", "opw00009", !"2".Equals(sPrevNext) ? 0 : 2, "5678");
         }
 
         public void 계좌별주문체결현황요청응답처리(string orderDate, object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveTrDataEvent e, string sPrevNext)
@@ -151,7 +183,6 @@ namespace WindowsFormsApp2.Common
             if ("2".Equals(sPrevNext))
             {
                 계좌주문별체결현황요청(sPrevNext);
-                Thread.Sleep(500);
             }
             else
             {
@@ -160,9 +191,23 @@ namespace WindowsFormsApp2.Common
 
         }
 
+        DateTime 최종실시간미체결요청시간 = DateTime.MinValue;
+
         public int 실시간미체결요청()
         {
             if (string.IsNullOrWhiteSpace(Biz.AccountNo)) return -1;
+
+            if (최종실시간미체결요청시간 == DateTime.MinValue )
+            {
+                최종실시간미체결요청시간 = DateTime.Now;
+            } else if ( DateTime.Now.AddSeconds(-8) <= 최종실시간미체결요청시간 )
+            {
+                return -1;
+            }
+            else
+            {
+                최종실시간미체결요청시간 = DateTime.Now;
+            }
 
             // 계좌번호 = 전문 조회할 보유계좌번호
             OpenAPI.SetInputValue("계좌번호", Biz.AccountNo);
@@ -401,6 +446,8 @@ namespace WindowsFormsApp2.Common
                 dacStock.현재가갱신(inqDate, item.종목코드, item.현재가);
 
                 dacStock.종목가격변동내역추가(inqDate, item);
+
+                Thread.Sleep(10);
             }
 
             log.Info("종목현재가조회응답처리 end");

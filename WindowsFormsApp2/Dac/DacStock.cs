@@ -171,6 +171,20 @@ namespace WindowsFormsApp2.Dac
             return Execute("SP_주식상태대기로변경_금액계산", p);
         }
 
+        public int 대상종목상태변경(string inqDate, string stockCode, string Status)
+        {
+            //string query = Properties.Resources.주식상태대기로변경;
+            //query = string.Format(query, inqDate, order.stockCode);
+            //return Execute(query);
+
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+            p.Add("@종목코드", stockCode);
+            p.Add("@상태", Status );
+
+            return Execute("SP_stock_target_상태변경", p);
+        }
+
         public decimal 매도요청중인금액조회(string inqDate)
         {
             decimal result = 0;
@@ -225,12 +239,39 @@ namespace WindowsFormsApp2.Dac
             return Query<StockMyOrder>("SP_매도정정대상조회", p);
         }
 
+        public List<StockMyOrder> 매도완료업데이트대상조회(string inqDate)
+        {
+            //string query = Properties.Resources.매도완료업데이트대상조회;
+            //query = string.Format(query, inqDate);
+            //return Query<StockOrder>(query);
+
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+
+            return Query<StockMyOrder>("SP_매도완료업데이트대상조회", p);
+        }
+
         public List<StockMyOrder> 매수완료된내역조회_myorderlist(string inqDate)
         {
             DynamicParameters p = new DynamicParameters();
             p.Add("@조회일자", inqDate);
 
             return Query<StockMyOrder>("SP_매수완료된내역조회_myorderlist", p);
+        }
+
+        public int 주문내역동기화완료처리(string myorderSeq)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@myorderSeq", myorderSeq);
+
+            return Execute("SP_myorderlist_동기화업데이트", p);
+        }
+
+        public StockMyOrder 동기화된마지막주문조회(string inqDate)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+            return QuerySingle<StockMyOrder>("SP_myorderlist_동기화된마지막주문조회", p);
         }
 
         #endregion
@@ -255,6 +296,7 @@ namespace WindowsFormsApp2.Dac
             p.Add("@주문상태", stockOrder.Status);
             p.Add("@APIResult", stockOrder.APIResult);
             p.Add("@원주문번호", stockOrder.orgOrderNo);
+            p.Add("@매수조건", stockOrder.Reason);
 
             Execute("SP_주문이력추가", p);
 
@@ -281,22 +323,25 @@ namespace WindowsFormsApp2.Dac
 
         public int 체결요청내역으로내주문업데이트(StockOrder stockOrder)
         {
-            string query = Properties.Resources.체결요청내역으로내주문업데이트;
-            query = string.Format(query, stockOrder.inqDate, stockOrder.stockCode, stockOrder.Qty
-                , stockOrder.orderNo, stockOrder.Price);
-            return Execute(query);
-        }
-
-        public List<StockMyOrder> 매도완료업데이트대상조회(string inqDate)
-        {
-            //string query = Properties.Resources.매도완료업데이트대상조회;
-            //query = string.Format(query, inqDate);
-            //return Query<StockOrder>(query);
+            //string query = Properties.Resources.체결요청내역으로내주문업데이트;
+            //query = string.Format(query, stockOrder.inqDate, stockOrder.stockCode, stockOrder.Qty
+            //    , stockOrder.orderNo, stockOrder.Price);
+            //return Execute(query);
 
             DynamicParameters p = new DynamicParameters();
-            p.Add("@조회일자", inqDate);
+            p.Add("@orderSeq", stockOrder.Seq);
+            p.Add("@주문번호", stockOrder.orderNo);
+            p.Add("@수량", stockOrder.Qty);
+            p.Add("@가격", stockOrder.Price);
+            p.Add("@체결수량", stockOrder.ConfirmQty);
+            p.Add("@체결가", stockOrder.ConfirmPrice);
+            p.Add("@주문타입", stockOrder.OrderType);
+            p.Add("@주문옵션", stockOrder.OrderOption);
+            p.Add("@주문상태", stockOrder.Status);
+            p.Add("@APIResult_1", stockOrder.APIResult);
+            p.Add("@원주문번호", stockOrder.orgOrderNo);
 
-            return Query<StockMyOrder>("SP_매도완료업데이트대상조회", p);
+            return Execute("SP_tbl_stock_order_주문정보업데이트", p);
         }
 
         public int 주문정보업데이트(string orderSeq, string orderNo, string qty, string price, string orderType, string status, string apiResult )
