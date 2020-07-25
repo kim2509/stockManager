@@ -297,6 +297,7 @@ namespace WindowsFormsApp2.Dac
             p.Add("@APIResult", stockOrder.APIResult);
             p.Add("@원주문번호", stockOrder.orgOrderNo);
             p.Add("@매수조건", stockOrder.Reason);
+            p.Add("@매수Seq", stockOrder.BuySeq);
 
             Execute("SP_주문이력추가", p);
 

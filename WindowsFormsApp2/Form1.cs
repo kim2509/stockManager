@@ -25,10 +25,12 @@ namespace WindowsFormsApp2
         string inqDate = DateTime.Now.ToString("yyyyMMdd");
         //string orderDate = "20200517";
         APIManager apiManager = null;
+        public string ExecuteMode { get; set; }
 
-        public Form1()
+        public Form1( string mode)
         {
             InitializeComponent();
+            ExecuteMode = mode;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -78,16 +80,21 @@ namespace WindowsFormsApp2
 
                         biz.stockList.Add(code);
                     }
-
+                    
                     Biz.AccountNo = comboBox1.SelectedItem.ToString();
 
                     if ( string.IsNullOrEmpty( Biz.AccountNo ) )
                     {
-                        log.Error("계좌가 존재하지 않음!!!");
+                        MessageBox.Show("계좌가 존재하지 않음!!!");
                         return;
                     }
 
-                    this.backgroundWorker1.RunWorkerAsync(10000);
+                    if ( "Auto".Equals( ExecuteMode ))
+                    {
+                        button3_Click(null, null);
+
+                        this.backgroundWorker1.RunWorkerAsync(10000);
+                    }
                 }
                 else
                     MessageBox.Show("연결오류");
@@ -334,32 +341,32 @@ namespace WindowsFormsApp2
                 }
                 else if (e.sRQName.Equals("계좌평가현황요청"))
                 {
-                    int rowCount = axKHOpenAPI1.GetRepeatCnt(e.sTrCode, e.sRQName);
+                    int rowCount = apiManager.GetRepeatCnt(e.sTrCode, e.sRQName);
 
                     for (int i = 0; i < rowCount; i++)
                     {
                         StockOrder stockInfo = new StockOrder();
                         stockInfo.inqDate = inqDate;
-                        stockInfo.stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
-                        stockInfo.stockName = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
+                        stockInfo.stockCode = apiManager.GetCommData(e.sTrCode, e.sRQName, i, "종목코드").Trim();
+                        stockInfo.stockName = apiManager.GetCommData(e.sTrCode, e.sRQName, i, "종목명").Trim();
 
                         if (stockInfo.stockCode.StartsWith("A"))
                             stockInfo.stockCode = stockInfo.stockCode.Substring(1);
 
-                        stockInfo.Price = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "현재가").Trim();
+                        stockInfo.Price = apiManager.GetCommData(e.sTrCode, e.sRQName, i, "현재가").Trim();
                         if (string.IsNullOrWhiteSpace(stockInfo.Price))
                             stockInfo.Price = "0";
 
-                        int price = int.Parse(stockInfo.Price) - (int)(int.Parse(stockInfo.Price) * 0.02);
+                        int price = int.Parse(stockInfo.Price); // - (int)(int.Parse(stockInfo.Price) * 0.02);
 
-                        stockInfo.Qty = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, i, "보유수량").Trim();
+                        stockInfo.Qty = apiManager.GetCommData(e.sTrCode, e.sRQName, i, "보유수량").Trim();
 
                         if (string.IsNullOrWhiteSpace(stockInfo.Qty))
                             stockInfo.Qty = "0";
 
                         int qty = int.Parse(stockInfo.Qty);
 
-                        axKHOpenAPI1.SendOrder("매도처리", "1234", comboBox1.SelectedItem.ToString(), 2, stockInfo.stockCode, qty, price, "00", "");
+                        apiManager.SendOrder("매도처리", "1234", comboBox1.SelectedItem.ToString(), 2, stockInfo.stockCode, qty, price, "00", "");
 
                         Thread.Sleep(500);
 
@@ -425,7 +432,35 @@ namespace WindowsFormsApp2
                     log.Info("주문/체결시간 : " + orderHour + "시 " + orderMinute + "분 " + orderSecond + "초");
                     log.Info("주문구분 : " + axKHOpenAPI1.GetChejanData(905));
                     log.Info("주문가격 : " + String.Format("{0:#,###}", orderPrice));
+                    log.Info("체결수량" + axKHOpenAPI1.GetChejanData(911) + " | " + " 체결가 : " + axKHOpenAPI1.GetChejanData(910));
                     log.Info("----------------------------------------------------------");
+
+                    if ("체결".Equals(axKHOpenAPI1.GetChejanData(913)))
+                    {
+                        string stockCode = axKHOpenAPI1.GetChejanData(9001).Trim();
+                        string 주문구분 = axKHOpenAPI1.GetChejanData(905);
+                        if (주문구분.IndexOf("매수") >= 0)
+                            주문구분 = "매수";
+                        else if (주문구분.IndexOf("매도") >= 0)
+                            주문구분 = "매도";
+
+                        List<StockOrder> listOrders = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, 주문구분, "요청중");
+
+                        for ( int i = 0; i < listOrders.Count; i++ )
+                        {
+                            StockOrder order = listOrders[i];
+                            if (order.orderNo.Equals(axKHOpenAPI1.GetChejanData(9203).Trim()))
+                            {
+                                string 체결수량 = axKHOpenAPI1.GetChejanData(911).Trim();
+                                string 체결가 = axKHOpenAPI1.GetChejanData(910).Trim();
+
+                                if ( Util.GetInt(order.Qty) == Util.GetInt(체결수량) && Util.GetInt(order.Price) == Util.GetInt(체결가))
+                                {
+
+                                }
+                            }
+                        }
+                    }
 
                     //string stockCode = axKHOpenAPI1.GetChejanData(9001).Trim();
                     //if (stockCode.StartsWith("A"))
@@ -611,7 +646,7 @@ namespace WindowsFormsApp2
                 axKHOpenAPI1.SetInputValue("비밀번호입력매체구분", "00");
 
 
-                int result = axKHOpenAPI1.CommRqData("계좌평가현황요청", "OPW00004", 0, "1234");
+                int result = apiManager.CommRqData("계좌평가현황요청", "OPW00004", 0, "1234");
             } catch ( Exception ex )
             {
                 MessageBox.Show(ex.Message);

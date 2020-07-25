@@ -82,7 +82,7 @@ namespace WindowsFormsApp2.Common
                 {
                     최종계좌주문별체결현황요청시간 = DateTime.Now;
                 }
-                else if (DateTime.Now.AddSeconds(-5) <= 최종계좌주문별체결현황요청시간)
+                else if (DateTime.Now.AddSeconds(-8) <= 최종계좌주문별체결현황요청시간)
                 {
                     b체결현황요청중 = false;
                     return -1;
@@ -116,14 +116,14 @@ namespace WindowsFormsApp2.Common
             OpenAPI.SetInputValue("매도수구분", "0");
 
             // 조회구분 = 0:전체, 1:체결
-            OpenAPI.SetInputValue("조회구분", "1");
+            OpenAPI.SetInputValue("조회구분", "0");
 
             OpenAPI.SetInputValue("종목코드", "");
 
             string 마지막주문번호 = string.Empty;
-            StockMyOrder lastOrder = dacStock.동기화된마지막주문조회(inqDate);
-            if (lastOrder != null)
-                마지막주문번호 = lastOrder.orderNo;
+            //StockMyOrder lastOrder = dacStock.동기화된마지막주문조회(inqDate);
+            //if (lastOrder != null)
+            //    마지막주문번호 = lastOrder.orderNo;
 
             log.Info("계좌별주문체결현황요청 마지막주문번호 : " + 마지막주문번호);
 

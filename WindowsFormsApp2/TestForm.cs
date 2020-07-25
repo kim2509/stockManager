@@ -153,5 +153,19 @@ namespace WindowsFormsApp2
                 MessageBox.Show(ex.Message);
             }
         }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string buySeq = biz.마지막매수주문Seq가져오기("20200717", "005070");
+
+                MessageBox.Show(buySeq);
+
+            } catch ( Exception ex )
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
     }
 }

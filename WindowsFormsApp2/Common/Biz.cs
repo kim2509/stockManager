@@ -38,7 +38,7 @@ namespace WindowsFormsApp2.Common
         static decimal TotalBalance = 10000000;
         
         // 한 종목당 30만원씩 매수
-        static int EachStockBudget = 300000;
+        static int EachStockBudget = 500000;
 
         bool b장전시간외조회여부 = false;
 
@@ -277,7 +277,7 @@ namespace WindowsFormsApp2.Common
                             int waterCnt = 0;
                             if (!string.IsNullOrWhiteSpace(targetList[i].waterCnt)) waterCnt = int.Parse(targetList[i].waterCnt);
 
-                            BuyStock(inqDate, targetList[i].stockCode, targetList[i].stockName, price, "", waterCnt);
+                            BuyStock(inqDate, targetList[i].stockCode, targetList[i].stockName, price, "", waterCnt, 매수조건);
                         }
                     }
                 }
@@ -361,7 +361,7 @@ namespace WindowsFormsApp2.Common
 
 
                         if (b추가매수가능여부 && waterCnt <= 1)
-                            BuyStock(inqDate, order.stockCode, order.stockName, price, "추가매수", waterCnt);
+                            BuyStock(inqDate, order.stockCode, order.stockName, price, "추가매수", waterCnt, "");
                     }
                 }
 
@@ -388,7 +388,7 @@ namespace WindowsFormsApp2.Common
                     int price = int.Parse(order.Price);
                     int qty = int.Parse(order.Qty);
                     // 0.5% 더 낮은 금액으로 손절요청
-                    price -= (int)(price * 0.002);
+                    //price -= (int)(price * 0.002);
 
                     매도정정요청(order.inqDate, order.orderNo, order.stockCode, order.stockName, qty, price);
                 }
@@ -429,7 +429,7 @@ namespace WindowsFormsApp2.Common
                 매도요청할주문.Qty = 대상종목.보유수;
                 매도요청할주문.Price = 대상종목.매입단가;
 
-                SellStock(매도요청할주문, 0.7);
+                SellStock(매도요청할주문, 1);
 
                 dacStock.대상종목상태변경(inqDate, 대상종목.stockCode, "매도요청중");
             }
@@ -502,19 +502,19 @@ namespace WindowsFormsApp2.Common
             //    bBuy = false;
 
             // 체결강도가 80% 이상이면서 체결강도등락률이 50%가 넘으면서 거래량증가율이 20% 이상(체결강도와 거래량이 폭발한 경우)(seq : 1565889)
-            if (Util.GetDouble(실시간정보.체결강도) > 80 &&
-                Util.GetDouble(실시간정보.체결강도등락률) > 50 &&
-                Util.GetDouble(실시간정보.거래량등락률) > 20)
-            {
-                reason = "조건1";
-            }
+            //if (Util.GetDouble(실시간정보.체결강도) > 80 &&
+            //    Util.GetDouble(실시간정보.체결강도등락률) > 50 &&
+            //    Util.GetDouble(실시간정보.거래량등락률) > 20)
+            //{
+            //    reason = "조건1";
+            //}
             
             if (Util.GetDouble(실시간정보.체결강도) > 100 &&
                 Util.GetDouble(실시간정보.거래량) > 3000000 &&
                Util.GetDouble(실시간정보.거래량등락률) > 0)
             {
                 // 체결강도가 100% 넘으면서 거래량이 300만이 넘으면서 계속증가하는 경우
-                reason = "매수안함".Equals(reason) ? "조건2" : "|조건2";
+                reason = "매수안함".Equals(reason) ? "조건2" : reason + "|조건2";
             }
             
             if (Util.GetDouble(실시간정보.체결강도) > 80 &&
@@ -522,7 +522,7 @@ namespace WindowsFormsApp2.Common
                 Util.GetDouble(실시간정보.총매도잔량등락률) - Util.GetDouble(실시간정보.총매수잔량등락률) >= 55)
             {
                 // 체결강도가 80% 이상이면서 체결강도등락률이 0이상이면서 총매도잔량등락률 - 총매수잔량등락률이 55%이상(매도매수잔량이 폭발하는 경우)
-                reason = "매수안함".Equals(reason) ? "조건3" : "|조건3";
+                reason = "매수안함".Equals(reason) ? "조건3" : reason + "|조건3";
             }
             
             if (Util.GetDouble(실시간정보.잔량비율) >= 2.2 &&
@@ -530,13 +530,13 @@ namespace WindowsFormsApp2.Common
                 Util.GetDouble(실시간정보.체결강도) >= 91)
             {
                 // 총매도잔량/총매수잔량이 2.2이상이면서 총매도잔량/매수잔량비율이 60%이상 증가하면서 체결강도 91이상(Seq: 1582889)
-                reason = "매수안함".Equals(reason) ? "조건4" : "|조건4";
+                reason = "매수안함".Equals(reason) ? "조건4" : reason + "|조건4";
             }
             
             if ( Util.GetDouble(실시간정보.잔량비율등락률) >= 140 )
             {
-                // 총매도잔량/총매수잔량이 2.2이상이면서 총매도잔량/매수잔량비율이 60%이상 증가하면서 체결강도 91이상(Seq: 1582889)
-                reason = "매수안함".Equals(reason) ? "조건5" : "|조건5";
+                // 잔량비율등락률 이 140% 이상일때. 총매도잔량이 폭발할때
+                reason = "매수안함".Equals(reason) ? "조건5" : reason + "|조건5";
             }
 
             return reason;
@@ -633,7 +633,7 @@ namespace WindowsFormsApp2.Common
                     }
                     else
                     {
-                        dacStock.주식상태매도요청중으로변경(order.inqDate, order.stockCode, int.Parse(order.Qty), int.Parse(order.Price), "");
+                        dacStock.주식상태매도요청중으로변경(order.inqDate, order.stockCode, int.Parse(order.ConfirmQty), int.Parse(order.ConfirmPrice), "");
                     }
                 }
             }
@@ -641,7 +641,7 @@ namespace WindowsFormsApp2.Common
             log.Info("매수완료처리및매도요청 end");
         }
 
-        public void BuyStock(string inqDate, string stockCode, string stockName, int price, string option, int waterCnt)
+        public void BuyStock(string inqDate, string stockCode, string stockName, int price, string option, int waterCnt, string 매수조건)
         {
             int qty = EachStockBudget / price;
 
@@ -669,6 +669,7 @@ namespace WindowsFormsApp2.Common
             order.OrderType = "매수";
             order.Status = "요청중";
             order.OrderOption = option;
+            order.Reason = 매수조건;
             int orderSeq = dacStock.주식주문이력추가(order);
 
             int resultCode = OpenAPI.SendOrder("종목신규매수", orderSeq.ToString(), AccountNo, 1, order.stockCode = stockCode, qty, price, "00", "");
@@ -716,6 +717,7 @@ namespace WindowsFormsApp2.Common
             order.OrderType = "매도";
             order.OrderOption = "";
             order.Status = "요청중";
+            order.BuySeq = 마지막매수주문Seq가져오기(inqDate, stock.stockCode);
             int orderSeq = dacStock.주식주문이력추가(order);
 
             int resultCode = OpenAPI.SendOrder("신규종목매도주문", orderSeq.ToString(), AccountNo, 2, stock.stockCode, qty, price, "00", "");
@@ -725,6 +727,20 @@ namespace WindowsFormsApp2.Common
             dacStock.주문정보업데이트(orderSeq.ToString(), order.APIResult, "");
 
             log.Info("SellStock end");
+        }
+
+        public string 마지막매수주문Seq가져오기( string inqDate, string stockCode )
+        {
+            StockOrder order = null;
+
+            List <StockOrder> 매수주문리스트 = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, "매수", "완료");
+            if (매수주문리스트 != null && 매수주문리스트.Count > 0)
+            {
+                order = 매수주문리스트.Where(x => !"추가매수".Equals(x.OrderOption)).OrderByDescending(x => x.Seq).FirstOrDefault();
+                return order.Seq;
+            }
+            else
+                return string.Empty;
         }
 
         /// <summary>
@@ -758,6 +774,7 @@ namespace WindowsFormsApp2.Common
             order.OrderType = "매도정정";
             order.OrderOption = "";
             order.Status = "요청중";
+            order.BuySeq = 마지막매수주문Seq가져오기(inqDate, stockCode);
             order.orgOrderNo = orgOrderNo;
 
             int orderSeq = dacStock.주식주문이력추가(order);

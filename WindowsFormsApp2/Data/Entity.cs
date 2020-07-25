@@ -89,6 +89,7 @@ namespace WindowsFormsApp2.Data
         public string Price { get; set; }
         public string ConfirmQty { get; set; }
         public string ConfirmPrice { get; set; }
+        public string BuySeq { get; set; }
         public string Status { get; set; }
         public string OrderType { get; set; }
         public string OrderOption { get; set; }
