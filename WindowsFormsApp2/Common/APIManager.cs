@@ -44,6 +44,11 @@ namespace WindowsFormsApp2.Common
             return OpenAPI.GetCommData(sTrCode, sRQName, index, fieldName);
         }
 
+        public string GetChejanData(int nFid)
+        {
+            return OpenAPI.GetChejanData(nFid);
+        }
+
         public int CommKwRqData( string sArrCode, int bNext, int nCodeCount, int nTypeFlag, string sRQName, string sScreenNo )
         {
             mut.WaitOne();

@@ -21,6 +21,7 @@ namespace WindowsFormsApp2
 
         Biz biz = null;
         TRBiz trBiz = null;
+        BuyBiz buyBiz = null;
         DacStock dacStock = new DacStock();
         string inqDate = DateTime.Now.ToString("yyyyMMdd");
         //string orderDate = "20200517";
@@ -38,6 +39,7 @@ namespace WindowsFormsApp2
             apiManager = new APIManager(axKHOpenAPI1);
             axKHOpenAPI1.CommConnect();
             trBiz = new TRBiz(apiManager);
+            buyBiz = new BuyBiz(apiManager);
         }
 
         private void axKHOpenAPI1_OnEventConnect(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnEventConnectEvent e)
@@ -444,22 +446,7 @@ namespace WindowsFormsApp2
                         else if (주문구분.IndexOf("매도") >= 0)
                             주문구분 = "매도";
 
-                        List<StockOrder> listOrders = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, 주문구분, "요청중");
-
-                        for ( int i = 0; i < listOrders.Count; i++ )
-                        {
-                            StockOrder order = listOrders[i];
-                            if (order.orderNo.Equals(axKHOpenAPI1.GetChejanData(9203).Trim()))
-                            {
-                                string 체결수량 = axKHOpenAPI1.GetChejanData(911).Trim();
-                                string 체결가 = axKHOpenAPI1.GetChejanData(910).Trim();
-
-                                if ( Util.GetInt(order.Qty) == Util.GetInt(체결수량) && Util.GetInt(order.Price) == Util.GetInt(체결가))
-                                {
-
-                                }
-                            }
-                        }
+                        buyBiz.체결완료처리(inqDate, stockCode, 주문구분, axKHOpenAPI1.GetChejanData(911).Trim(), axKHOpenAPI1.GetChejanData(910).Trim());
                     }
 
                     //string stockCode = axKHOpenAPI1.GetChejanData(9001).Trim();
@@ -488,6 +475,8 @@ namespace WindowsFormsApp2
                 log.Info("axKHOpenAPI1_OnReceiveChejanData end");
             }
         }
+
+        
 
         private void axKHOpenAPI1_OnReceiveMsg(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveMsgEvent e)
         {
