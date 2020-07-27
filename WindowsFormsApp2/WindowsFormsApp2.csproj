@@ -104,6 +104,7 @@
   <ItemGroup>
     <Compile Include="Common\APIManager.cs" />
     <Compile Include="Common\Biz.cs" />
+    <Compile Include="Common\SubBiz.cs" />
     <Compile Include="Common\DBHelper.cs" />
     <Compile Include="Common\TRBiz.cs" />
     <Compile Include="Common\Util.cs" />

@@ -172,4 +172,16 @@ namespace WindowsFormsApp2.Data
         public string 총매수건수 { get; set; }
         public string createdDate { get; set; }
     }
+
+    public class 당일실적
+    {
+        public string 매도방식 { get; set; }
+        public string 들어간금액 { get; set; }
+        public string 실현손익금액 { get; set; }
+        public string 증권사수수료 { get; set; }
+        public string 거래세 { get; set; }
+        public string 현재까지실제수익 { get; set; }
+        public string 보유중평가금액손익 { get; set; }
+        public string 실제예상수익 { get; set; }
+    }
 }

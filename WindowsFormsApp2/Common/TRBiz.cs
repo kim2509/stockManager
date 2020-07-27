@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -63,36 +64,13 @@ namespace WindowsFormsApp2.Common
             dacStock.거래량정보에서현재가갱신(inqDate);
         }
 
-        bool b체결현황요청중 = false;
-        DateTime 최종계좌주문별체결현황요청시간 = DateTime.MinValue;
 
         public int 계좌주문별체결현황요청(string sPrevNext = "0")
         {
-            if ("0".Equals(sPrevNext) && b체결현황요청중) return -1;
-
             if (string.IsNullOrWhiteSpace(Biz.AccountNo))
             {
-                b체결현황요청중 = false;
                 return -1;
             }
-
-            if ("0".Equals(sPrevNext))
-            {
-                if (최종계좌주문별체결현황요청시간 == DateTime.MinValue)
-                {
-                    최종계좌주문별체결현황요청시간 = DateTime.Now;
-                }
-                else if (DateTime.Now.AddSeconds(-8) <= 최종계좌주문별체결현황요청시간)
-                {
-                    b체결현황요청중 = false;
-                    return -1;
-                }
-                else
-                {
-                    최종계좌주문별체결현황요청시간 = DateTime.Now;
-                }
-            }
-            
 
             // 주문일자 = YYYYMMDD (20170101 연도4자리, 월 2자리, 일 2자리 형식)
             OpenAPI.SetInputValue("주문일자", inqDate);
@@ -129,13 +107,13 @@ namespace WindowsFormsApp2.Common
 
             OpenAPI.SetInputValue("시작주문번호", 마지막주문번호);
 
-            b체결현황요청중 = true;
-
             return OpenAPI.CommRqData("계좌별주문체결현황요청", "opw00009", !"2".Equals(sPrevNext) ? 0 : 2, "5678");
         }
 
         public void 계좌별주문체결현황요청응답처리(string orderDate, object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveTrDataEvent e, string sPrevNext)
         {
+            log.Info("계좌별주문체결현황요청응답처리 start orderDate:" + orderDate + " sPrevNext:" + sPrevNext);
+
             int rowCount = OpenAPI.GetRepeatCnt(e.sTrCode, e.sRQName);
 
             for (int i = 0; i < rowCount; i++)
@@ -170,12 +148,20 @@ namespace WindowsFormsApp2.Common
                 myOrder.modifyFlag = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "정정취소구분").Trim();
                 myOrder.confirmedTime = OpenAPI.GetCommData(e.sTrCode, e.sRQName, i, "체결시간").Trim();
 
+                log.Info("체결현황요청응답 : " + JsonConvert.SerializeObject(myOrder));
+
                 if (!string.IsNullOrWhiteSpace(myOrder.orderNo))
                 {
                     if (dacStock.체결내역있는지검사(myOrder) == null)
+                    {
+                        log.Info("신규등록");
                         dacStock.체결내역한건등록(myOrder);
+                    }
                     else
+                    {
+                        log.Info("기존거 수정");
                         dacStock.체결내역업데이트(myOrder);
+                    }
                 }
 
             }
@@ -184,11 +170,8 @@ namespace WindowsFormsApp2.Common
             {
                 계좌주문별체결현황요청(sPrevNext);
             }
-            else
-            {
-                b체결현황요청중 = false;
-            }
 
+            log.Info("계좌별주문체결현황요청응답처리 start");
         }
 
         DateTime 최종실시간미체결요청시간 = DateTime.MinValue;

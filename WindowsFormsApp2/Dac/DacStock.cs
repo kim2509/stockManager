@@ -141,7 +141,7 @@ namespace WindowsFormsApp2.Dac
             return Execute(query);
         }
 
-        public int 주식상태매도요청중으로변경(string inqDate, string stockCode, int 매수수량, int 매수금액, string 추가매수여부 )
+        public int 주식상태매수완료처리로변경(string inqDate, string stockCode, int 매수수량, int 매수금액, string 추가매수여부 )
         {
             //string query = Properties.Resources.주식상태매도요청중으로변경;
             //query = string.Format(query, inqDate, order.stockCode, 매수한수량, 매수한금액);
@@ -556,6 +556,14 @@ namespace WindowsFormsApp2.Dac
             p.Add("@flag", flag);
 
             return Execute("SP_전일_거래량거래대금순조회", p);
+        }
+
+        public 당일실적 당일실적조회(string inqDate)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+
+            return QuerySingle<당일실적>("SP_당일실적조회", p);
         }
     }
 }
