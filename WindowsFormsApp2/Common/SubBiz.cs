@@ -36,8 +36,8 @@ namespace WindowsFormsApp2.Common
                 StockOrder order = listOrders[i];
                 if (order.orderNo.Equals(주문번호))
                 {
-                    order.ConfirmQty = (Util.GetInt(order.ConfirmQty) + Util.GetInt(체결수량)).ToString();
-                    order.ConfirmPrice = (Util.GetInt(order.ConfirmPrice) + Util.GetInt(체결가)).ToString();
+                    order.ConfirmQty = 체결수량;
+                    order.ConfirmPrice = 체결가;
                     order.Status = "완료";
 
                     log.Info("체결완료처리 order : " + JsonConvert.SerializeObject(order));

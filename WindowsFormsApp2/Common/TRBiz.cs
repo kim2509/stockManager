@@ -99,9 +99,9 @@ namespace WindowsFormsApp2.Common
             OpenAPI.SetInputValue("종목코드", "");
 
             string 마지막주문번호 = string.Empty;
-            //StockMyOrder lastOrder = dacStock.동기화된마지막주문조회(inqDate);
-            //if (lastOrder != null)
-            //    마지막주문번호 = lastOrder.orderNo;
+            StockMyOrder lastOrder = dacStock.동기화된마지막주문조회(inqDate);
+            if (lastOrder != null)
+                마지막주문번호 = lastOrder.orderNo;
 
             log.Info("계좌별주문체결현황요청 마지막주문번호 : " + 마지막주문번호);
 

@@ -227,13 +227,8 @@ namespace WindowsFormsApp2
         {
             try
             {
-                log.Info("axKHOpenAPI1_OnReceiveTrData start");
-
-                log.Info(e.sScrNo);
-                log.Info(e.sRQName);
-                log.Info(e.sTrCode);
-                log.Info(e.sRecordName);
-                log.Info(e.sPrevNext);
+                log.Info("axKHOpenAPI1_OnReceiveTrData start e.sScrNo:" + e.sScrNo + " e.sRQName:" + e.sRQName + " e.sTrCode:" + e.sTrCode
+                    + " e.sRecordName:" + e.sRecordName + " e.sPrevNext:" + e.sPrevNext );
 
                 if (e.sRQName == "계좌평가잔고내역요청")
                 {
@@ -327,7 +322,7 @@ namespace WindowsFormsApp2
                     }
                     else
                     {
-                        log.Error("주문번호업데이트!!");
+                        log.Info("주문번호업데이트!! orderSeq: " + orderSeq + " orderNo:" + orderNo);
                         dacStock.주문번호업데이트_bySeq(orderSeq, orderNo);
                     }
                 }
@@ -444,6 +439,9 @@ namespace WindowsFormsApp2
                         string 주문번호 = axKHOpenAPI1.GetChejanData(9203).Trim();
                         string 체결수량 = axKHOpenAPI1.GetChejanData(911).Trim();
                         string 체결가 = axKHOpenAPI1.GetChejanData(910).Trim();
+
+                        if (stockCode.StartsWith("A"))
+                            stockCode = stockCode.Substring(1);
 
                         if (주문구분.IndexOf("매수") >= 0)
                             주문구분 = "매수";

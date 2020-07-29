@@ -555,6 +555,13 @@ namespace WindowsFormsApp2.Common
                 reason = "매수안함".Equals(reason) ? "조건5" : reason + "|조건5";
             }
 
+            List<StockOrder> orderList = dacStock.tbl_stock_order_주문조회(inqDate, 정보.종목코드, "매도정정", "요청중");
+            if ( orderList != null && orderList.Count > 0 )
+            {
+                log.Info("매도정정중인 주문이 존재하여 매수안함 조건 : " + reason);
+                reason = "매수안함";
+            }
+
             return reason;
         }
 
@@ -967,6 +974,12 @@ namespace WindowsFormsApp2.Common
                 {
                     log.Info("Price 다름");
                     continue;
+                }
+
+                if ( string.IsNullOrWhiteSpace( order.orderNo ))
+                {
+                    log.Info("주문번호가 없어서 myorderlist 에서 주문번호 업데이트");
+                    dacStock.주문번호업데이트_bySeq(order.Seq, 매도정정대상[i].orderNo);
                 }
 
                 // tbl_stock_order 업데이트
