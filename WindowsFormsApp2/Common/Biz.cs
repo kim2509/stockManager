@@ -336,7 +336,7 @@ namespace WindowsFormsApp2.Common
                 log.Info("추가매수프로세스 start");
 
                 // tbl_stock_target 에서 조회
-                List<StockTarget> 매도요청중인종목리스트 = dacStock.매도요청중인종목전체조회(inqDate);
+                List<StockTarget> 매도요청중인종목리스트 = dacStock.종목대상전체조회(inqDate, "매도요청중");
 
                 // -2.5% 밑으로 인 애들 조회해서 추가매수한다.
                 for (int i = 0; i < 매도요청중인종목리스트.Count; i++)
@@ -388,7 +388,7 @@ namespace WindowsFormsApp2.Common
         public void 수익률에따른손절처리()
         {
             // tbl_stock_target 에서 조회
-            List<StockTarget> 매도요청중인종목리스트 = dacStock.매도요청중인종목전체조회(inqDate);
+            List<StockTarget> 매도요청중인종목리스트 = dacStock.종목대상전체조회(inqDate, "매도요청중");
 
             // -5% 밑으로 인 애들 조회해서 현재가로 손절한다.
             for (int i = 0; i < 매도요청중인종목리스트.Count; i++)
@@ -414,7 +414,7 @@ namespace WindowsFormsApp2.Common
         public void 장마감전보유종목정리()
         {
             // tbl_stock_target 에서 조회
-            List<StockTarget> 매도요청중인종목리스트 = dacStock.매도요청중인종목전체조회(inqDate);
+            List<StockTarget> 매도요청중인종목리스트 = dacStock.종목대상전체조회(inqDate, "매도요청중");
 
             // 3시 20분부터는 매도요청중인 종목을 손절한다.
             if (DateTime.Now.ToString("HHmm").CompareTo("1500") >= 0)

@@ -127,11 +127,12 @@ namespace WindowsFormsApp2.Dac
             return Query<StockTarget>(query);
         }
 
-        public List<StockTarget> 매도요청중인종목전체조회(string inqDate)
+        public List<StockTarget> 종목대상전체조회(string inqDate, string status)
         {
             DynamicParameters p = new DynamicParameters();
             p.Add("@조회일자", inqDate);
-            return Query<StockTarget>("SP_매도요청중인종목전체조회", p);
+            p.Add("@상태", status);
+            return Query<StockTarget>("SP_종목대상전체조회", p);
         }
 
         public int 주식상태매수요청중으로변경(string inqDate, string stockCode)
