@@ -38,15 +38,16 @@ namespace WindowsFormsApp2.Common
                 {
                     order.ConfirmQty = 체결수량;
                     order.ConfirmPrice = 체결가;
-                    order.Status = "완료";
-
+                    
                     log.Info("체결완료처리 order : " + JsonConvert.SerializeObject(order));
-
-                    if (!"매도정정".Equals(주문구분))
-                        dacStock.체결요청내역으로내주문업데이트(order);
 
                     if (Util.GetInt(order.Qty) == Util.GetInt(order.ConfirmQty))
                     {
+                        order.Status = "완료";
+
+                        if (!"매도정정".Equals(주문구분))
+                            dacStock.체결요청내역으로내주문업데이트(order);
+
                         if ("매수".Equals(주문구분))
                         {
                             매수완료처리(order);
@@ -59,6 +60,11 @@ namespace WindowsFormsApp2.Common
                         {
                             매도정정완료처리(inqDate, order);
                         }
+                    }
+                    else
+                    {
+                        if (!"매도정정".Equals(주문구분))
+                            dacStock.체결요청내역으로내주문업데이트(order);
                     }
                 }
             }

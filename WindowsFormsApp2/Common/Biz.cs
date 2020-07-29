@@ -267,57 +267,28 @@ namespace WindowsFormsApp2.Common
                     DateTime.Now.ToString("HHmm").CompareTo("1530") > 0) return;
                 
                 // 3시까지만 매수(10종목만 매수)
-                if (DateTime.Now.ToString("HHmm").CompareTo("1500") <= 0 ) //&& 매도요청중인종목리스트.Count < 10)
+                if (DateTime.Now.ToString("HHmm").CompareTo("1230") <= 0 ) //&& 매도요청중인종목리스트.Count < 10)
                 {
-                    List<StockTarget> targetList = dacStock.금일매수대상목록조회(inqDate);
-
-                    for (int i = 0; i < targetList.Count; i++)
-                    {
-                        종목증감정보 정보 = dacStock.종목최근등락률조회(inqDate, targetList[i].stockCode);
-                        종목실시간정보 실시간정보 = dacStock.최근한종목가격변동내역조회(inqDate, targetList[i].stockCode);
-
-                        log.Info("종목최근등락률조회 결과:" + JsonConvert.SerializeObject(정보));
-                        log.Info(string.Format("체결강도 : {0} 총매도잔량 : {1} 총매수잔량 : {2}", 실시간정보.체결강도, 실시간정보.총매도잔량, 실시간정보.총매수잔량));
-
-                        if (정보 == null) continue;
-
-                        log.Info("매수대상 :" + JsonConvert.SerializeObject(targetList[i]));
-
-                        string 매수조건 = 매수여부판단(정보, 실시간정보);
-                        log.Info("매수조건 : " + 매수조건);
-
-                        if ( !"매수안함".Equals(매수조건) )
-                        {
-                            int price = Util.GetInt(targetList[i].currentPrice);
-
-                            int waterCnt = 0;
-                            if (!string.IsNullOrWhiteSpace(targetList[i].waterCnt)) waterCnt = int.Parse(targetList[i].waterCnt);
-
-                            BuyStock(inqDate, targetList[i].stockCode, targetList[i].stockName, price, "", waterCnt, 매수조건);
-                        }
-                    }
+                    매수처리();
                 }
 
                 // 매수요청 후 체결된 애들 조회(tbl_stock_myorderlist)
-                매수완료처리및매도요청();
+                매수완료처리();
 
-                List<StockTarget> 당일대상리스트 = dacStock.당일대상조회(inqDate, "");
-
-                for ( int i = 0; i < 당일대상리스트.Count; i++ )
+                if (DateTime.Now.ToString("HHmm").CompareTo("1300") >= 0) // 1시부터 매도요청
                 {
-                    if ("일반".Equals(당일대상리스트[i].매도방식))
-                        대상종목매도요청(당일대상리스트[i]);
-                    else
-                    {
-                        호가매도처리(당일대상리스트[i]);
-                    }
+                    매도처리();
                 }
 
                 추가매수프로세스();
 
                 수익률에따른손절처리();
 
-                장마감전보유종목정리();
+                // 3시 20분부터는 매도요청중인 종목을 손절한다.
+                if (DateTime.Now.ToString("HHmm").CompareTo("1300") >= 0)
+                {
+                    장마감전보유종목정리();
+                }
             }
             catch (Exception ex)
             {
@@ -329,66 +300,103 @@ namespace WindowsFormsApp2.Common
             }
         }
 
+        public void 매수처리()
+        {
+            List<StockTarget> targetList = dacStock.금일매수대상목록조회(inqDate);
+
+            for (int i = 0; i < targetList.Count; i++)
+            {
+                종목증감정보 정보 = dacStock.종목최근등락률조회(inqDate, targetList[i].stockCode);
+                종목실시간정보 실시간정보 = dacStock.최근한종목가격변동내역조회(inqDate, targetList[i].stockCode);
+
+                log.Info("종목최근등락률조회 결과:" + JsonConvert.SerializeObject(정보));
+                log.Info(string.Format("체결강도 : {0} 총매도잔량 : {1} 총매수잔량 : {2}", 실시간정보.체결강도, 실시간정보.총매도잔량, 실시간정보.총매수잔량));
+
+                if (정보 == null) continue;
+
+                log.Info("매수대상 :" + JsonConvert.SerializeObject(targetList[i]));
+
+                string 매수조건 = 매수여부판단(정보, 실시간정보);
+                log.Info("매수조건 : " + 매수조건);
+
+                if (!"매수안함".Equals(매수조건))
+                {
+                    int price = Util.GetInt(targetList[i].currentPrice);
+
+                    int waterCnt = 0;
+                    if (!string.IsNullOrWhiteSpace(targetList[i].waterCnt)) waterCnt = int.Parse(targetList[i].waterCnt);
+
+                    BuyStock(inqDate, targetList[i].stockCode, targetList[i].stockName, price, "", waterCnt, 매수조건);
+                }
+            }
+        }
+
+        public void 매도처리()
+        {
+            List<StockTarget> 당일대상리스트 = dacStock.당일대상조회(inqDate, "");
+
+            for (int i = 0; i < 당일대상리스트.Count; i++)
+            {
+                if ("일반".Equals(당일대상리스트[i].매도방식))
+                    대상종목매도요청(당일대상리스트[i]);
+                else
+                {
+                    호가매도처리(당일대상리스트[i]);
+                }
+            }
+        }
+
         public void 추가매수프로세스()
         {
-            if (DateTime.Now.ToString("HHmm").CompareTo("1500") < 0)
+            
+            log.Info("추가매수프로세스 start");
+
+            // tbl_stock_target 에서 조회
+            List<StockTarget> 매수완료종목리스트 = dacStock.종목대상전체조회(inqDate, "매수완료");
+
+            // -2.5% 밑으로 인 애들 조회해서 추가매수한다.
+            for (int i = 0; i < 매수완료종목리스트.Count; i++)
             {
-                log.Info("추가매수프로세스 start");
+                if ("호가매도".Equals(매수완료종목리스트[i].매도방식)) continue;
 
-                // tbl_stock_target 에서 조회
-                List<StockTarget> 매도요청중인종목리스트 = dacStock.매도요청중인종목전체조회(inqDate);
+                log.Info("매수완료종목리스트[i]:" + 매수완료종목리스트[i].stockCode + " 손익률:" + 매수완료종목리스트[i].손익률);
 
-                // -2.5% 밑으로 인 애들 조회해서 추가매수한다.
-                for (int i = 0; i < 매도요청중인종목리스트.Count; i++)
+                string tmpRate = 매수완료종목리스트[i].손익률;
+                if (string.IsNullOrWhiteSpace(tmpRate)) tmpRate = "0";
+
+                if (float.Parse(tmpRate) <= -1.5 )
                 {
-                    if ("호가매도".Equals(매도요청중인종목리스트[i].매도방식)) continue;
+                    log.Info("매수완료종목[i]:" + JsonConvert.SerializeObject(매수완료종목리스트[i]));
 
-                    log.Info("매도요청중인종목리스트[i]:" + 매도요청중인종목리스트[i].stockCode + " 손익률:" + 매도요청중인종목리스트[i].손익률);
-                    string tmpRate = 매도요청중인종목리스트[i].손익률;
-                    if (string.IsNullOrWhiteSpace(tmpRate)) tmpRate = "0";
+                    // 현재가
+                    int price = Util.GetInt(매수완료종목리스트[i].currentPrice);
+                    int waterCnt = Util.GetInt(매수완료종목리스트[i].waterCnt);
 
-                    if (float.Parse(tmpRate) <= -1.5 )
+                    bool b추가매수가능여부 = true;
+
+                    List<StockOrder> 주문리스트 = dacStock.tbl_stock_order_주문조회(inqDate, 매수완료종목리스트[i].stockCode, "매수", "요청중");
+                    if (주문리스트 != null && 주문리스트.Count > 0)
                     {
-                        log.Info("매도요청중인종목[i]:" + JsonConvert.SerializeObject(매도요청중인종목리스트[i]));
-
-                        StockOrder order = dacStock.매도요청중인주문한종목조회(inqDate, 매도요청중인종목리스트[i].stockCode);
-
-                        if (order == null)
+                        for (int j = 0; j < 주문리스트.Count; j++)
                         {
-                            log.Info("order 가 null 이여 씨벌~");
-                            continue;
+                            if ("추가매수".Equals(주문리스트[j].OrderOption))
+                                b추가매수가능여부 = false;
                         }
-
-                        // 현재가
-                        int price = Util.GetInt(order.Price);
-                        int waterCnt = Util.GetInt(매도요청중인종목리스트[i].waterCnt);
-
-                        bool b추가매수가능여부 = true;
-
-                        List<StockOrder> 주문리스트 = dacStock.tbl_stock_order_주문조회(inqDate, order.stockCode, "매수", "요청중");
-                        if (주문리스트 != null && 주문리스트.Count > 0)
-                        {
-                            for (int j = 0; j < 주문리스트.Count; j++)
-                            {
-                                if ("추가매수".Equals(주문리스트[j].OrderOption))
-                                    b추가매수가능여부 = false;
-                            }
-                        }
-
-
-                        if (b추가매수가능여부 && waterCnt <= 0)
-                            BuyStock(inqDate, order.stockCode, order.stockName, price, "추가매수", waterCnt, "");
                     }
-                }
 
-                log.Info("추가매수프로세스 end");
+
+                    if (b추가매수가능여부 && waterCnt <= 0)
+                        BuyStock(inqDate, 매수완료종목리스트[i].stockCode, 매수완료종목리스트[i].stockName, price, "추가매수", waterCnt, "");
+                }
             }
+
+            log.Info("추가매수프로세스 end");
         }
 
         public void 수익률에따른손절처리()
         {
             // tbl_stock_target 에서 조회
-            List<StockTarget> 매도요청중인종목리스트 = dacStock.매도요청중인종목전체조회(inqDate);
+            List<StockTarget> 매도요청중인종목리스트 = dacStock.종목대상전체조회(inqDate, "매도요청중");
 
             // -5% 밑으로 인 애들 조회해서 현재가로 손절한다.
             for (int i = 0; i < 매도요청중인종목리스트.Count; i++)
@@ -409,27 +417,54 @@ namespace WindowsFormsApp2.Common
                     매도정정요청(order.inqDate, order.orderNo, order.stockCode, order.stockName, qty, price);
                 }
             }
+
+            // tbl_stock_target 에서 조회
+            List<StockTarget> 매수완료종목리스트 = dacStock.종목대상전체조회(inqDate, "매수완료");
+
+            // -5% 밑으로 인 애들 조회해서 현재가로 손절한다.
+            for (int i = 0; i < 매수완료종목리스트.Count; i++)
+            {
+                string tmpRate = 매수완료종목리스트[i].손익률;
+                if (string.IsNullOrWhiteSpace(tmpRate)) tmpRate = "0";
+
+                if (float.Parse(tmpRate) <= -1.5)
+                {
+                    List<StockOrder> listOrders = dacStock.tbl_stock_order_주문조회(inqDate, 매수완료종목리스트[i].stockCode, "매수", "요청중");
+                    if ( listOrders != null && listOrders.Count > 0)
+                    {
+                        log.Info("매수요청중인 주문건이 있어 매도요청안함.");
+                        continue;
+                    }
+
+                    StockOrder 매도요청할주문 = new StockOrder();
+                    매도요청할주문.inqDate = inqDate;
+                    매도요청할주문.stockCode = 매수완료종목리스트[i].stockCode;
+                    매도요청할주문.stockName = 매수완료종목리스트[i].stockName;
+                    매도요청할주문.Qty = 매수완료종목리스트[i].보유수;
+                    매도요청할주문.Price = 매수완료종목리스트[i].currentPrice;
+
+                    SellStock(매도요청할주문, 0);
+
+                    dacStock.대상종목상태변경(inqDate, 매수완료종목리스트[i].stockCode, "매도요청중");
+                }
+            }
         }
 
         public void 장마감전보유종목정리()
         {
             // tbl_stock_target 에서 조회
-            List<StockTarget> 매도요청중인종목리스트 = dacStock.매도요청중인종목전체조회(inqDate);
+            List<StockTarget> 매도요청중인종목리스트 = dacStock.종목대상전체조회(inqDate, "매도요청중");
 
-            // 3시 20분부터는 매도요청중인 종목을 손절한다.
-            if (DateTime.Now.ToString("HHmm").CompareTo("1500") >= 0)
+            for (int i = 0; i < 매도요청중인종목리스트.Count; i++)
             {
-                for (int i = 0; i < 매도요청중인종목리스트.Count; i++)
-                {
-                    StockOrder order = dacStock.매도요청중인주문한종목조회(inqDate, 매도요청중인종목리스트[i].stockCode);
+                StockOrder order = dacStock.매도요청중인주문한종목조회(inqDate, 매도요청중인종목리스트[i].stockCode);
 
-                    if (order == null) continue;
+                if (order == null) continue;
 
-                    int price = int.Parse(order.Price);
-                    int qty = int.Parse(order.Qty);
+                int price = int.Parse(order.Price);
+                int qty = int.Parse(order.Qty);
 
-                    매도정정요청(order.inqDate, order.orderNo, order.stockCode, order.stockName, qty, price);
-                }
+                매도정정요청(order.inqDate, order.orderNo, order.stockCode, order.stockName, qty, price);
             }
         }
 
@@ -437,7 +472,6 @@ namespace WindowsFormsApp2.Common
         {
             if (!"매도요청중".Equals(대상종목.status) && Util.GetInt(대상종목.보유수) > 0)
             {
-
                 StockOrder 매도요청할주문 = new StockOrder();
                 매도요청할주문.inqDate = inqDate;
                 매도요청할주문.stockCode = 대상종목.stockCode;
@@ -445,7 +479,7 @@ namespace WindowsFormsApp2.Common
                 매도요청할주문.Qty = 대상종목.보유수;
                 매도요청할주문.Price = 대상종목.매입단가;
 
-                SellStock(매도요청할주문, 1.5);
+                SellStock(매도요청할주문, 0);
 
                 dacStock.대상종목상태변경(inqDate, 대상종목.stockCode, "매도요청중");
             }
@@ -565,7 +599,7 @@ namespace WindowsFormsApp2.Common
             return reason;
         }
 
-        private void 매수완료처리및매도요청()
+        private void 매수완료처리()
         {
             log.Info("매수완료처리및매도요청 start");
 
@@ -786,19 +820,22 @@ namespace WindowsFormsApp2.Common
                 return;
             }
 
-            List<StockOrder> orderlist = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, "매도정정", "요청중");
-            if (orderlist.Count > 0)
-            {
-                log.Error("매도정정요청중인 주문이 존재!!!");
-                return;
-            }
-
-            orderlist = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, "매수", "요청중");
+            List<StockOrder> orderlist = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, "매수", "요청중");
             if (orderlist.Count > 0)
             {
                 log.Error("매수요청중인 주문이 존재!!!");
                 return;
             }
+
+            /*
+            orderlist = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, "매도정정", "요청중");
+            if (orderlist.Count > 0)
+            {
+                log.Error("매도정정요청중인 주문이 존재!!!");
+                return;
+            }
+            */
+            
 
             StockOrder order = new StockOrder();
             order.inqDate = inqDate;
