@@ -21,7 +21,7 @@ namespace WindowsFormsApp2
 
         Biz biz = null;
         TRBiz trBiz = null;
-        SubBiz buyBiz = null;
+        SubBiz subBiz = null;
         DacStock dacStock = new DacStock();
         string inqDate = DateTime.Now.ToString("yyyyMMdd");
         //string orderDate = "20200517";
@@ -39,7 +39,8 @@ namespace WindowsFormsApp2
             apiManager = new APIManager(axKHOpenAPI1);
             axKHOpenAPI1.CommConnect();
             trBiz = new TRBiz(apiManager);
-            buyBiz = new SubBiz(apiManager);
+            subBiz = new SubBiz(apiManager);
+            biz = new Biz(apiManager, subBiz, trBiz);
         }
 
         private void axKHOpenAPI1_OnEventConnect(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnEventConnectEvent e)
@@ -48,10 +49,6 @@ namespace WindowsFormsApp2
             {
                 if (e.nErrCode == 0)
                 {
-                    
-                    biz = new Biz(apiManager);
-                    biz.trBiz = trBiz;
-
                     string accountlist = axKHOpenAPI1.GetLoginInfo("ACCLIST");
                     string[] account = accountlist.Split(';');
                     for (int i = 0; i < account.Length; i++)
@@ -96,6 +93,10 @@ namespace WindowsFormsApp2
                         button3_Click(null, null);
 
                         this.backgroundWorker1.RunWorkerAsync(10000);
+                    }
+                    else if ( "SetTarget".Equals( ExecuteMode ) )
+                    {
+                        trBiz.당일거래량상위요청("1", "3");
                     }
                 }
                 else
@@ -455,7 +456,7 @@ namespace WindowsFormsApp2
                         log.Info("체결인지함. 주문구분:" + 주문구분 + " stockCode:" + stockCode);
 
                         if ( !string.IsNullOrWhiteSpace(주문구분))
-                            buyBiz.체결완료처리(inqDate, stockCode, 주문구분, 주문번호 , 체결수량, 체결가);
+                            subBiz.체결완료처리(inqDate, stockCode, 주문구분, 주문번호 , 체결수량, 체결가);
                     }
                     else
                     {
@@ -662,6 +663,11 @@ namespace WindowsFormsApp2
             form.trBiz = trBiz;
             form.biz = biz;
             form.Show();
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.Close();
         }
     }
 }

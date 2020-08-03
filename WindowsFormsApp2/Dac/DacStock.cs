@@ -323,7 +323,7 @@ namespace WindowsFormsApp2.Dac
             return Query<StockOrder>("SP_tbl_stock_order_주문조회", p);
         }
 
-        public int 체결요청내역으로내주문업데이트(StockOrder stockOrder)
+        public int 주문정보업데이트_byOrderSeq(StockOrder stockOrder)
         {
             //string query = Properties.Resources.체결요청내역으로내주문업데이트;
             //query = string.Format(query, stockOrder.inqDate, stockOrder.stockCode, stockOrder.Qty
@@ -346,20 +346,6 @@ namespace WindowsFormsApp2.Dac
             return Execute("SP_tbl_stock_order_주문정보업데이트", p);
         }
 
-        public int 주문정보업데이트(string orderSeq, string orderNo, string qty, string price, string orderType, string status, string apiResult )
-        {
-            DynamicParameters p = new DynamicParameters();
-            p.Add("@orderSeq", orderSeq);
-            p.Add("@주문번호", orderNo);
-            p.Add("@수량", qty);
-            p.Add("@가격", price);
-            p.Add("@주문타입", orderType);
-            p.Add("@주문상태", status);
-            p.Add("@APIResult_1", apiResult);
-
-            return Execute("SP_tbl_stock_order_주문정보업데이트", p);
-        }
-
         public StockOrder 매도요청중인주문한종목조회(string inqDate, string stockCode)
         {
             DynamicParameters p = new DynamicParameters();
@@ -367,6 +353,15 @@ namespace WindowsFormsApp2.Dac
             p.Add("@종목코드", stockCode);
 
             return QuerySingle<StockOrder>("SP_매도요청중인주문한종목조회", p);
+        }
+
+        public StockOrder 주문번호로주문조회(string inqDate, string orderNo)
+        {
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+            p.Add("@주문번호", orderNo);
+
+            return QuerySingle<StockOrder>("SP_tbl_stock_order_주문번호로주문조회", p);
         }
 
         public int 주문정보업데이트( string OrderSeq, string APIResult, string 주문번호, string 종목코드 = "" )
@@ -402,15 +397,15 @@ namespace WindowsFormsApp2.Dac
             return Execute("SP_주문상태변경", p);
         }
 
-        public int 매도정정내역으로주문업데이트(StockMyOrder stockOrder)
+        public int 매도정정내역으로주문업데이트(string inqDate, string orderNo, string stockCode, string confirmQty, string confirmPrice, string orgOrderNo)
         {
             DynamicParameters p = new DynamicParameters();
-            p.Add("@주문일자_v", stockOrder.orderDate);
-            p.Add("@주문번호_v", stockOrder.orderNo);
-            p.Add("@종목코드_v", stockOrder.stockCode);
-            p.Add("@체결수량_v", stockOrder.confirmQty);
-            p.Add("@체결가_v", stockOrder.confirmPrice);
-            p.Add("@원주문번호_v", stockOrder.orgOrderNo);
+            p.Add("@주문일자_v", inqDate);
+            p.Add("@주문번호_v", orderNo);
+            p.Add("@종목코드_v", stockCode);
+            p.Add("@체결수량_v", confirmQty);
+            p.Add("@체결가_v", confirmPrice);
+            p.Add("@원주문번호_v", orgOrderNo);
 
             return Execute("SP_매도정정주문업데이트", p);
         }

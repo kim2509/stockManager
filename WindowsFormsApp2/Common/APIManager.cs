@@ -11,7 +11,7 @@ namespace WindowsFormsApp2.Common
     public class APIManager
     {
         private static Mutex mut = new Mutex();
-        int delay = 1000;
+        int delay = 500;
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -75,6 +75,7 @@ namespace WindowsFormsApp2.Common
                 , nOrderType.ToString(), sRQName, sAccNo, sScreenNo, sCode, nQty.ToString(), nPrice.ToString(), sOrgOrderNo ));
 
             int resultCode = OpenAPI.SendOrder(sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGbn, sOrgOrderNo);
+
             Thread.Sleep(delay);
 
             mut.ReleaseMutex();
