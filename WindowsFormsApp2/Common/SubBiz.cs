@@ -196,7 +196,7 @@ namespace WindowsFormsApp2.Common
                         , Util.GetMoneyFormatString(실적.보유중평가금액손익)
                         , Util.GetMoneyFormatString(실적.실제예상수익));
 
-            Util.SendMail("kim2509@gmail.com;smk10009@naver.com", "오늘 대용PC 주식매매 결과", message);
+            Util.SendMail("kim2509@gmail.com;smk10009@naver.com", "오늘 망구PC 주식매매 결과", message);
         }
 
     }
