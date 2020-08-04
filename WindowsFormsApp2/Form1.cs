@@ -36,11 +36,11 @@ namespace WindowsFormsApp2
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //apiManager = new APIManager(axKHOpenAPI1);
-            //axKHOpenAPI1.CommConnect();
-            //trBiz = new TRBiz(apiManager);
-            //subBiz = new SubBiz(apiManager);
-            //biz = new Biz(apiManager, subBiz, trBiz);
+            apiManager = new APIManager(axKHOpenAPI1);
+            axKHOpenAPI1.CommConnect();
+            trBiz = new TRBiz(apiManager);
+            subBiz = new SubBiz(apiManager);
+            biz = new Biz(apiManager, subBiz, trBiz);
         }
 
         private void axKHOpenAPI1_OnEventConnect(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnEventConnectEvent e)
