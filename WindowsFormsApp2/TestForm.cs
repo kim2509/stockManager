@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.OleDb;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -173,6 +174,21 @@ namespace WindowsFormsApp2
         {
             try
             {
+                당일실적 실적 = dacStock.당일실적조회("20200804");
+
+                string message = string.Format(@"들어간금액 : {1} <br/> 실현손익금액 : {2} <br/> 증권사수수료 : {3} <br/> 
+                            거래세 : {4} <br/> 현재까지실제수익 : {5} <br/> 보유중평가금액손익 : {6} <br/> 실제예상수익 : {7}"
+                            , 실적.매도방식
+                            , Util.GetMoneyFormatString(실적.들어간금액)
+                            , Util.GetMoneyFormatString(실적.실현손익금액)
+                            , Util.GetMoneyFormatString(실적.증권사수수료)
+                            , Util.GetMoneyFormatString(실적.거래세)
+                            , Util.GetMoneyFormatString(실적.현재까지실제수익)
+                            , Util.GetMoneyFormatString(실적.보유중평가금액손익)
+                            , Util.GetMoneyFormatString(실적.실제예상수익));
+
+                Util.SendMail("kim2509@gmail.com", "오늘 대용PC 주식매매 결과", message);
+                //Util.SendMail("kim2509@gmail.com", "오늘 망구PC 주식매매 결과", message);
 
             } catch ( Exception ex )
             {

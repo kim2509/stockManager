@@ -49,6 +49,8 @@ namespace WindowsFormsApp2.Common
 
         DateTime 최종계좌주문별체결현황요청시간 = DateTime.MinValue;
 
+        bool b중간보고여부 = false;
+
         // This method models an operation that may take a long time
         // to run. It can be cancelled, it can raise an exception,
         // or it can exit normally and return a result. These outcomes
@@ -166,6 +168,12 @@ namespace WindowsFormsApp2.Common
                         break;
                     }
 
+                    if ( !b중간보고여부 && DateTime.Now.ToString("HHmm").CompareTo("1000") > 0)
+                    {
+                        subBiz.SendReportMail(inqDate);
+                        b중간보고여부 = true;
+                    }
+
                     log.Info("loop end");
                 }
 
@@ -174,6 +182,8 @@ namespace WindowsFormsApp2.Common
             {
                 log.Error(ex);
             }
+
+            subBiz.SendReportMail(inqDate);
 
             log.Info("TimeConsumingOperation end");
 

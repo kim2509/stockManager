@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
@@ -21,6 +22,19 @@ namespace WindowsFormsApp2.Common
             if (string.IsNullOrWhiteSpace(number)) return 0.0;
 
             return double.Parse(number);
+        }
+
+        public static decimal GetDecimal( string number )
+        {
+            if (string.IsNullOrWhiteSpace(number)) return 0;
+
+            return Decimal.Parse(number);
+        }
+
+        public static string GetMoneyFormatString(string number)
+        {
+            decimal money = Util.GetDecimal(number);
+            return money.ToString("C", CultureInfo.CurrentCulture);
         }
 
         public static void SendMail(string toAddress, string title, string bodyHtml)
