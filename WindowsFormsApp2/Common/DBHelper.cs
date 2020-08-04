@@ -6,6 +6,8 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WindowsFormsApp2.Data;
+using static Dapper.SqlMapper;
 
 namespace WindowsFormsApp2.Common
 {
@@ -79,6 +81,19 @@ namespace WindowsFormsApp2.Common
             using (var connection = connectionFactory())
             {
                 result = Dapper.SqlMapper.QuerySingleOrDefault<T>(connection, spName, p, null, null, CommandType.StoredProcedure);
+            }
+
+            return result;
+        }
+
+        public dynamic QueryMultiple<T>(string spName, DynamicParameters p)
+        {
+            object result = null;
+
+            using (var connection = connectionFactory())
+            {
+                GridReader gr = Dapper.SqlMapper.QueryMultiple(connection, spName, p, null, null, CommandType.StoredProcedure);
+                List<dynamic> targetList = gr.Read<dynamic>().ToList();
             }
 
             return result;
