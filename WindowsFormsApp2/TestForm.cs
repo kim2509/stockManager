@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net.Core;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -161,6 +162,17 @@ namespace WindowsFormsApp2
                 string buySeq = biz.마지막매수주문Seq가져오기("20200717", "005070");
 
                 MessageBox.Show(buySeq);
+
+            } catch ( Exception ex )
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            try
+            {
 
             } catch ( Exception ex )
             {

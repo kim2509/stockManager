@@ -809,6 +809,21 @@ namespace WindowsFormsApp2.Common
                 return;
             }
 
+            orderlist = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, "매수", "완료");
+            for ( int i = 0; i < orderlist.Count; i++ )
+            {
+                if ( "추가매수".Equals(orderlist[i].OrderOption) )
+                {
+                    DateTime updateDate = DateTime.Parse(orderlist[i].updateDate);
+
+                    if (DateTime.Now.AddSeconds(-10) < updateDate)
+                    {
+                        log.Info("20초내의 추가매수완료건이 존재함");
+                        return;
+                    }
+                }
+            }
+
             orderlist = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, "매도정정", "요청중");
 
             if ( orderlist != null && orderlist.Count > 0 )
