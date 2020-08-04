@@ -1,12 +1,17 @@
 ﻿using log4net.Core;
+using Newtonsoft.Json;
+using OfficeOpenXml;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.OleDb;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +24,7 @@ namespace WindowsFormsApp2
 {
     public partial class TestForm : Form
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public AxKHOpenAPILib.AxKHOpenAPI OpenAPI { get; set; }
         public Biz biz { get; set; }
         public TRBiz trBiz { get; set; }
@@ -191,6 +197,52 @@ namespace WindowsFormsApp2
                 //Util.SendMail("kim2509@gmail.com", "오늘 망구PC 주식매매 결과", message);
 
             } catch ( Exception ex )
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Hashtable hash = dacStock.실적상세조회("20200804");
+
+                //create a new memorystream for the excel file
+                MemoryStream ms;
+
+                ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                //create a new ExcelPackage
+                using (ExcelPackage excelPackage = new ExcelPackage())
+                {
+                    //create a WorkSheet
+                    ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("실적");
+                    DataTable 실적 = Util.CreateDataTable<당일실적>((List<당일실적>)hash["실적"]);
+                    worksheet.Cells["A1"].LoadFromDataTable(실적, true);
+
+                    worksheet = excelPackage.Workbook.Worksheets.Add("대상리스트");
+                    DataTable 대상리스트 = Util.CreateDataTable<StockTarget>((List<StockTarget>)hash["대상리스트"]);
+                    worksheet.Cells["A1"].LoadFromDataTable(대상리스트, true);
+
+                    worksheet = excelPackage.Workbook.Worksheets.Add("주문리스트");
+                    DataTable 주문리스트 = Util.CreateDataTable<StockOrder>((List<StockOrder>)hash["주문리스트"]);
+                    worksheet.Cells["A1"].LoadFromDataTable(주문리스트, true);
+
+                    worksheet = excelPackage.Workbook.Worksheets.Add("증권사주문리스트");
+                    DataTable 증권사주문리스트 = Util.CreateDataTable<StockMyOrder>((List<StockMyOrder>)hash["증권사주문리스트"]);
+                    worksheet.Cells["A1"].LoadFromDataTable(증권사주문리스트, true);
+
+                    //Save your file
+                    FileInfo fi = new FileInfo(@"C:\File.xlsx");
+                    excelPackage.SaveAs(fi);
+
+                    ms = new MemoryStream(excelPackage.GetAsByteArray());
+                }
+
+                Util.SendMail("kim2509@gmail.com", "실적", "오예~", new Attachment(ms, "매매리포트_" + DateTime.Now.ToString("yyyyMMdd")+ 
+                    ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            }
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }

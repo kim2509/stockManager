@@ -1,7 +1,12 @@
 ﻿using Newtonsoft.Json;
+using OfficeOpenXml;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using WindowsFormsApp2.Dac;
@@ -183,20 +188,62 @@ namespace WindowsFormsApp2.Common
 
         public void SendReportMail(string inqDate)
         {
-            당일실적 실적 = dacStock.당일실적조회(inqDate);
+            try
+            {
+                당일실적 실적 = dacStock.당일실적조회(inqDate);
 
-            string message = string.Format(@"들어간금액 : {1} <br/> 실현손익금액 : {2} <br/> 증권사수수료 : {3} <br/> 
+                string message = string.Format(@"들어간금액 : {1} <br/> 실현손익금액 : {2} <br/> 증권사수수료 : {3} <br/> 
                             거래세 : {4} <br/> 현재까지실제수익 : {5} <br/> 보유중평가금액손익 : {6} <br/> 실제예상수익 : {7}"
-                        , 실적.매도방식
-                        , Util.GetMoneyFormatString(실적.들어간금액)
-                        , Util.GetMoneyFormatString(실적.실현손익금액)
-                        , Util.GetMoneyFormatString(실적.증권사수수료)
-                        , Util.GetMoneyFormatString(실적.거래세)
-                        , Util.GetMoneyFormatString(실적.현재까지실제수익)
-                        , Util.GetMoneyFormatString(실적.보유중평가금액손익)
-                        , Util.GetMoneyFormatString(실적.실제예상수익));
+                            , 실적.매도방식
+                            , Util.GetMoneyFormatString(실적.들어간금액)
+                            , Util.GetMoneyFormatString(실적.실현손익금액)
+                            , Util.GetMoneyFormatString(실적.증권사수수료)
+                            , Util.GetMoneyFormatString(실적.거래세)
+                            , Util.GetMoneyFormatString(실적.현재까지실제수익)
+                            , Util.GetMoneyFormatString(실적.보유중평가금액손익)
+                            , Util.GetMoneyFormatString(실적.실제예상수익));
 
-            Util.SendMail("kim2509@gmail.com;smk10009@naver.com", "오늘 대용PC 주식매매 결과", message);
+                //Util.SendMail("kim2509@gmail.com;smk10009@naver.com", "오늘 대용PC 주식매매 결과", message);
+
+                Hashtable hash = dacStock.실적상세조회(inqDate);
+
+                //create a new memorystream for the excel file
+                MemoryStream ms;
+
+                ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                //create a new ExcelPackage
+                using (ExcelPackage excelPackage = new ExcelPackage())
+                {
+                    //create a WorkSheet
+                    ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("실적");
+                    DataTable 실적리포트 = Util.CreateDataTable<당일실적>((List<당일실적>)hash["실적"]);
+                    worksheet.Cells["A1"].LoadFromDataTable(실적리포트, true);
+
+                    worksheet = excelPackage.Workbook.Worksheets.Add("대상리스트");
+                    DataTable 대상리스트 = Util.CreateDataTable<StockTarget>((List<StockTarget>)hash["대상리스트"]);
+                    worksheet.Cells["A1"].LoadFromDataTable(대상리스트, true);
+
+                    worksheet = excelPackage.Workbook.Worksheets.Add("주문리스트");
+                    DataTable 주문리스트 = Util.CreateDataTable<StockOrder>((List<StockOrder>)hash["주문리스트"]);
+                    worksheet.Cells["A1"].LoadFromDataTable(주문리스트, true);
+
+                    worksheet = excelPackage.Workbook.Worksheets.Add("증권사주문리스트");
+                    DataTable 증권사주문리스트 = Util.CreateDataTable<StockMyOrder>((List<StockMyOrder>)hash["증권사주문리스트"]);
+                    worksheet.Cells["A1"].LoadFromDataTable(증권사주문리스트, true);
+
+                    //Save your file
+                    FileInfo fi = new FileInfo(@"C:\File.xlsx");
+                    excelPackage.SaveAs(fi);
+
+                    ms = new MemoryStream(excelPackage.GetAsByteArray());
+                }
+
+                Util.SendMail("kim2509@gmail.com;smk10009@naver.com", "오늘 대용PC 주식매매 결과", message, new Attachment(ms, "매매리포트_" + DateTime.Now.ToString("yyyyMMdd") +
+                    ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            } catch ( Exception ex )
+            {
+                log.Error(ex);
+            }
         }
 
     }

@@ -6,6 +6,8 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WindowsFormsApp2.Data;
+using static Dapper.SqlMapper;
 
 namespace WindowsFormsApp2.Common
 {
