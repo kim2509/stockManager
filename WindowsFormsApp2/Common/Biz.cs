@@ -17,7 +17,6 @@ namespace WindowsFormsApp2.Common
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         bool bDoneStockCodeUpdate = false;
-        bool bTestMode = true;
         public APIManager OpenAPI { get; set; }
 
         public TRBiz trBiz { get; set; }
@@ -43,8 +42,6 @@ namespace WindowsFormsApp2.Common
         
         // 한 종목당 30만원씩 매수
         public static int EachStockBudget = 400000;
-
-        bool b장전시간외조회여부 = false;
 
 
         DateTime 최종계좌주문별체결현황요청시간 = DateTime.MinValue;

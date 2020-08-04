@@ -86,19 +86,6 @@ namespace WindowsFormsApp2.Common
             return result;
         }
 
-        public dynamic QueryMultiple<T>(string spName, DynamicParameters p)
-        {
-            object result = null;
-
-            using (var connection = connectionFactory())
-            {
-                GridReader gr = Dapper.SqlMapper.QueryMultiple(connection, spName, p, null, null, CommandType.StoredProcedure);
-                List<dynamic> targetList = gr.Read<dynamic>().ToList();
-            }
-
-            return result;
-        }
-
         public int Execute(string sql)
         {
             sql = sql.Replace(@"\r", "");
