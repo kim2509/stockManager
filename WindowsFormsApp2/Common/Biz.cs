@@ -121,7 +121,7 @@ namespace WindowsFormsApp2.Common
 
                     log.Info("loop 실시간미체결요청 finished");
 
-                    if (최종계좌주문별체결현황요청시간 == DateTime.MinValue || DateTime.Now.AddSeconds(-120) > 최종계좌주문별체결현황요청시간)
+                    if (최종계좌주문별체결현황요청시간 == DateTime.MinValue || DateTime.Now.AddSeconds(-180) > 최종계좌주문별체결현황요청시간)
                     {
                         trBiz.계좌주문별체결현황요청();
                         최종계좌주문별체결현황요청시간 = DateTime.Now;
