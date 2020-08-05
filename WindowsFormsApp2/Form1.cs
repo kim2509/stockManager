@@ -317,25 +317,25 @@ namespace WindowsFormsApp2
 
                     log.Info(e.sRQName + " 주문번호: " + orderNo + " orderSeq:" + orderSeq + " stockCode:" + stockCode );
 
-                    if (string.IsNullOrWhiteSpace(orderNo))
-                    {
-                        log.Error("주문번호가 없어 씨벌");
-                    }
-                    else
-                    {
-                        log.Info("주문번호업데이트!! orderSeq: " + orderSeq + " orderNo:" + orderNo);
-                        dacStock.주문번호업데이트_bySeq(orderSeq, orderNo);
-                    }
+                    //if (string.IsNullOrWhiteSpace(orderNo))
+                    //{
+                    //    log.Error("주문번호가 없어 씨벌");
+                    //}
+                    //else
+                    //{
+                    //    log.Info("주문번호업데이트!! orderSeq: " + orderSeq + " orderNo:" + orderNo);
+                    //    dacStock.주문번호업데이트_bySeq(orderSeq, orderNo);
+                    //}
                 }
                 else if (e.sRQName.Equals("매도정정요청"))
                 {
-                    string orderSeq = e.sScrNo;
-                    string orderNo = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "주문번호").Trim();
-                    string stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목코드").Trim();
+                    //string orderSeq = e.sScrNo;
+                    //string orderNo = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "주문번호").Trim();
+                    //string stockCode = axKHOpenAPI1.GetCommData(e.sTrCode, e.sRQName, 0, "종목코드").Trim();
 
-                    log.Info(e.sRQName + " 주문번호: " + orderNo + " orderSeq:" + orderSeq + " stockCode:" + stockCode);
+                    //log.Info(e.sRQName + " 주문번호: " + orderNo + " orderSeq:" + orderSeq + " stockCode:" + stockCode);
 
-                    dacStock.주문번호업데이트_bySeq(orderSeq, orderNo);
+                    //dacStock.주문번호업데이트_bySeq(orderSeq, orderNo);
                 }
                 else if (e.sRQName.Equals("계좌평가현황요청"))
                 {
@@ -438,6 +438,8 @@ namespace WindowsFormsApp2
                         string stockCode = axKHOpenAPI1.GetChejanData(9001).Trim();
                         string 주문구분 = axKHOpenAPI1.GetChejanData(905).Trim();
                         string 주문번호 = axKHOpenAPI1.GetChejanData(9203).Trim();
+                        string 주문수량 = axKHOpenAPI1.GetChejanData(900).Trim();
+                        string 주문가격 = axKHOpenAPI1.GetChejanData(901).Trim();
                         string 체결수량 = axKHOpenAPI1.GetChejanData(911).Trim();
                         string 체결가 = axKHOpenAPI1.GetChejanData(910).Trim();
 
@@ -456,7 +458,7 @@ namespace WindowsFormsApp2
                         log.Info("체결인지함. 주문구분:" + 주문구분 + " stockCode:" + stockCode);
 
                         if ( !string.IsNullOrWhiteSpace(주문구분))
-                            subBiz.체결완료처리(inqDate, stockCode, 주문구분, 주문번호 , 체결수량, 체결가);
+                            subBiz.체결완료처리(inqDate, stockCode, 주문구분, 주문번호 , 주문수량, 주문가격, 체결수량, 체결가);
                     }
                     else
                     {

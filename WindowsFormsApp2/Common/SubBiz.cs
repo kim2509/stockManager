@@ -27,10 +27,10 @@ namespace WindowsFormsApp2.Common
             dacStock = new DacStock();
             OpenAPI = api;
         }
-        public void 체결완료처리(string inqDate, string stockCode, string 주문구분, string 주문번호, string 체결수량, string 체결가)
+        public void 체결완료처리(string inqDate, string stockCode, string 주문구분, string 주문번호, string 주문수량, string 주문가격, string 체결수량, string 체결가)
         {
             log.Info("체결완료처리 start inqDate:" + inqDate + " stockCode:" + stockCode + " 주문구분:" + 주문구분 + 
-                " 주문번호:" + 주문번호 + " 체결수량:" + 체결수량 + " 체결가:" + 체결가);
+                " 주문번호:" + 주문번호 + " 주문수량:" + 주문수량 + " 주문가격:" + 주문가격 + " 체결수량:" + 체결수량 + " 체결가:" + 체결가);
 
             if (Util.GetInt(체결수량) <= 0 || Util.GetInt(체결가) <= 0) return;
 
@@ -39,12 +39,28 @@ namespace WindowsFormsApp2.Common
             for (int i = 0; i < listOrders.Count; i++)
             {
                 StockOrder order = listOrders[i];
+
+                log.Info("주문비교 : " + JsonConvert.SerializeObject(order));
+
+                bool bMatch = false;
+
                 if (주문번호.Equals(order.orderNo))
+                {
+                    bMatch = true;    
+                }
+                else if ( string.IsNullOrWhiteSpace( order.orderNo ) && 
+                    Util.GetInt(주문수량) == Util.GetInt(order.Qty) && Util.GetInt(주문가격) == Util.GetInt(order.Price) )
+                {
+                    bMatch = true;
+                    order.orderNo = 주문번호;
+                }
+
+                if ( bMatch )
                 {
                     order.ConfirmQty = 체결수량;
                     order.ConfirmPrice = 체결가;
-                    
-                    log.Info("체결완료처리 order : " + JsonConvert.SerializeObject(order));
+
+                    log.Info("체결완료처리 orderSeq : " + order.Seq);
 
                     if (Util.GetInt(order.Qty) == Util.GetInt(order.ConfirmQty))
                     {
@@ -65,7 +81,15 @@ namespace WindowsFormsApp2.Common
                         }
                     }
                     else
+                    {
+                        log.Info("일부체결 orderSeq:" + order.Seq);
+
                         dacStock.주문정보업데이트_byOrderSeq(order);
+                    }
+                }
+                else
+                {
+                    log.Info("match 안됨 orderSeq:" + order.Seq);
                 }
             }
 
