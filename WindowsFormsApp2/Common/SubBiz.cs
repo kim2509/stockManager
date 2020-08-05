@@ -48,12 +48,12 @@ namespace WindowsFormsApp2.Common
                 {
                     bMatch = true;    
                 }
-                else if ( string.IsNullOrWhiteSpace( order.orderNo ) && 
-                    Util.GetInt(주문수량) == Util.GetInt(order.Qty) && Util.GetInt(주문가격) == Util.GetInt(order.Price) )
-                {
-                    bMatch = true;
-                    order.orderNo = 주문번호;
-                }
+                //else if ( string.IsNullOrWhiteSpace( order.orderNo ) && 
+                //    Util.GetInt(주문수량) == Util.GetInt(order.Qty) && Util.GetInt(주문가격) == Util.GetInt(order.Price) )
+                //{
+                //    bMatch = true;
+                //    order.orderNo = 주문번호;
+                //}
 
                 if ( bMatch )
                 {

@@ -433,32 +433,59 @@ namespace WindowsFormsApp2
                     log.Info("체결수량 : " + axKHOpenAPI1.GetChejanData(911) + " | " + " 체결가 : " + axKHOpenAPI1.GetChejanData(910));
                     log.Info("----------------------------------------------------------");
 
+                    string stockCode = axKHOpenAPI1.GetChejanData(9001).Trim();
+                    string 주문구분 = axKHOpenAPI1.GetChejanData(905).Trim();
+                    string 주문번호 = axKHOpenAPI1.GetChejanData(9203).Trim();
+                    string 주문수량 = axKHOpenAPI1.GetChejanData(900).Trim();
+                    string 주문가격 = axKHOpenAPI1.GetChejanData(901).Trim();
+
+                    if (주문구분.IndexOf("매수취소") >= 0)
+                        주문구분 = "매수취소";
+                    else if (주문구분.IndexOf("매수") >= 0)
+                        주문구분 = "매수";
+                    else if (주문구분.IndexOf("매도정정") >= 0)
+                        주문구분 = "매도정정";
+                    else if (주문구분.IndexOf("매도취소") >= 0)
+                        주문구분 = "매도취소";
+                    else if (주문구분.IndexOf("매도") >= 0)
+                        주문구분 = "매도";
+                    else
+                        주문구분 = string.Empty;
+
                     if ("체결".Equals(axKHOpenAPI1.GetChejanData(913).Trim()))
                     {
-                        string stockCode = axKHOpenAPI1.GetChejanData(9001).Trim();
-                        string 주문구분 = axKHOpenAPI1.GetChejanData(905).Trim();
-                        string 주문번호 = axKHOpenAPI1.GetChejanData(9203).Trim();
-                        string 주문수량 = axKHOpenAPI1.GetChejanData(900).Trim();
-                        string 주문가격 = axKHOpenAPI1.GetChejanData(901).Trim();
                         string 체결수량 = axKHOpenAPI1.GetChejanData(911).Trim();
                         string 체결가 = axKHOpenAPI1.GetChejanData(910).Trim();
 
                         if (stockCode.StartsWith("A"))
                             stockCode = stockCode.Substring(1);
 
-                        if (주문구분.IndexOf("매수") >= 0)
-                            주문구분 = "매수";
-                        else if (주문구분.IndexOf("매도정정") >= 0)
-                            주문구분 = "매도정정";
-                        else if (주문구분.IndexOf("매도") >= 0)
-                            주문구분 = "매도";
-                        else
-                            주문구분 = string.Empty;
-
                         log.Info("체결인지함. 주문구분:" + 주문구분 + " stockCode:" + stockCode);
 
                         if ( !string.IsNullOrWhiteSpace(주문구분))
                             subBiz.체결완료처리(inqDate, stockCode, 주문구분, 주문번호 , 주문수량, 주문가격, 체결수량, 체결가);
+                    }
+                    else if ("접수".Equals(axKHOpenAPI1.GetChejanData(913).Trim()))
+                    {
+                        List<StockOrder> listOrders = dacStock.tbl_stock_order_주문조회(inqDate, stockCode, 주문구분, "요청중");
+
+                        for ( int i = 0; i < listOrders.Count; i++ )
+                        {
+                            StockOrder order = listOrders[i];
+
+                            log.Info("접수상태 주문비교 : " + JsonConvert.SerializeObject(order));
+
+                            if (string.IsNullOrWhiteSpace(order.orderNo) &&
+                                Util.GetInt(주문수량) == Util.GetInt(order.Qty) && Util.GetInt(주문가격) == Util.GetInt(order.Price))
+                            {
+                                order.orderNo = 주문번호;
+                                dacStock.주문정보업데이트_byOrderSeq(order);
+
+                                log.Info("주문번호 업데이트 !! orderSeq:" + order.Seq + " orderNo:" + order.orderNo);
+                            }
+                            else
+                                log.Info("주문다름");
+                        }
                     }
                     else
                     {
