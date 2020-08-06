@@ -452,13 +452,15 @@ namespace WindowsFormsApp2
                     else
                         주문구분 = string.Empty;
 
+                    if (stockCode.StartsWith("A"))
+                        stockCode = stockCode.Substring(1);
+
                     if ("체결".Equals(axKHOpenAPI1.GetChejanData(913).Trim()))
                     {
                         string 체결수량 = axKHOpenAPI1.GetChejanData(911).Trim();
                         string 체결가 = axKHOpenAPI1.GetChejanData(910).Trim();
 
-                        if (stockCode.StartsWith("A"))
-                            stockCode = stockCode.Substring(1);
+                        
 
                         log.Info("체결인지함. 주문구분:" + 주문구분 + " stockCode:" + stockCode);
 
