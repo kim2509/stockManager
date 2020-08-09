@@ -41,7 +41,7 @@ namespace WindowsFormsApp2.Common
         public static decimal TotalBalance = 10000000;
         
         // 한 종목당 30만원씩 매수
-        public static int EachStockBudget = 400000;
+        public static int EachStockBudget = 300000;
 
 
         DateTime 최종계좌주문별체결현황요청시간 = DateTime.MinValue;

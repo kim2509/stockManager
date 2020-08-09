@@ -58,7 +58,7 @@ namespace WindowsFormsApp2.Common
 
             MailMessage message = new System.Net.Mail.MailMessage();
             message.From = new System.Net.Mail.MailAddress("kdy2509@naver.com"); //ex : ooo@naver.com
-            message.To.Add("kim2509@gmail.com"); //ex : ooo@gmail.com
+            message.To.Add(toAddress); //ex : ooo@gmail.com
             message.Subject = title;
             message.SubjectEncoding = System.Text.Encoding.UTF8;
             message.Body = bodyHtml;
