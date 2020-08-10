@@ -117,9 +117,9 @@ namespace WindowsFormsApp2.Common
                     log.Info("loop BuyAndSell finished");
 
                     // 매도요청중인 주문 업데이트 하기 위해.
-                    trBiz.실시간미체결요청();
+                    //trBiz.실시간미체결요청();
 
-                    log.Info("loop 실시간미체결요청 finished");
+                    //log.Info("loop 실시간미체결요청 finished");
 
                     //if (최종계좌주문별체결현황요청시간 == DateTime.MinValue || DateTime.Now.AddSeconds(-180) > 최종계좌주문별체결현황요청시간)
                     //{
