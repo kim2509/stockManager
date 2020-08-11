@@ -468,7 +468,7 @@ namespace WindowsFormsApp2.Common
                 매도요청할주문.Qty = 대상종목.보유수;
                 매도요청할주문.Price = 대상종목.매입단가;
 
-                SellStock(매도요청할주문, 2);
+                SellStock(매도요청할주문, 1.5);
             }
         }
 
