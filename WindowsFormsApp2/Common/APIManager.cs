@@ -10,7 +10,7 @@ namespace WindowsFormsApp2.Common
 {
     public class APIManager
     {
-        private static Mutex mut = new Mutex();
+        //private static Mutex mut = new Mutex();
         int delay = 500;
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -28,13 +28,17 @@ namespace WindowsFormsApp2.Common
 
         public int CommRqData( string sRQName, string sTRCode, int nPrevNext, string sScreenNo )
         {
-            mut.WaitOne();
+            //mut.WaitOne();
 
-            log.Info(string.Format("API호출 RQName: {0}, trCode: {1}, screenNo : {2} ", sRQName, sTRCode, sScreenNo ));
+            log.Info(string.Format("API호출 CommRqData RQName: {0}, trCode: {1}, screenNo : {2} ", sRQName, sTRCode, sScreenNo ));
             int resultCode = OpenAPI.CommRqData(sRQName, sTRCode, nPrevNext, sScreenNo);
-            Thread.Sleep(delay);
 
-            mut.ReleaseMutex();
+            log.Info("API호출 CommRqData 완료 resultCode : " + resultCode);
+
+            Thread.Sleep(delay);
+            
+
+            //mut.ReleaseMutex();
 
             return resultCode;
         }
@@ -51,13 +55,16 @@ namespace WindowsFormsApp2.Common
 
         public int CommKwRqData( string sArrCode, int bNext, int nCodeCount, int nTypeFlag, string sRQName, string sScreenNo )
         {
-            mut.WaitOne();
+            //mut.WaitOne();
 
             log.Info(string.Format("API호출 CommKwRqData RQName: {0}, screenNo : {1} ", sRQName, sScreenNo));
             int resultCode = OpenAPI.CommKwRqData(sArrCode, bNext, nCodeCount, nTypeFlag, sRQName, sScreenNo);
+
+            log.Info("API호출 CommKwRqData 완료 resultCode : " + resultCode);
+
             Thread.Sleep(delay);
 
-            mut.ReleaseMutex();
+            //mut.ReleaseMutex();
 
             return resultCode;
         }
@@ -69,16 +76,18 @@ namespace WindowsFormsApp2.Common
 
         public int SendOrder( string sRQName, string sScreenNo, string sAccNo, int nOrderType, string sCode, int nQty, int nPrice, string sHogaGbn, string sOrgOrderNo)
         {
-            mut.WaitOne();
+            //mut.WaitOne();
 
             log.Info(string.Format("API호출 SendOrder nOrderType : {0} RQName: {1}, sAccNo: {2}, screenNo : {3}, stockCode: {4}, nQty: {5}, nPrice : {6}, orgOrderNo: {7}"
                 , nOrderType.ToString(), sRQName, sAccNo, sScreenNo, sCode, nQty.ToString(), nPrice.ToString(), sOrgOrderNo ));
 
             int resultCode = OpenAPI.SendOrder(sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGbn, sOrgOrderNo);
 
+            log.Info("API호출완료 SendOrder resultCode:" + resultCode);
+
             Thread.Sleep(delay);
 
-            mut.ReleaseMutex();
+            //mut.ReleaseMutex();
 
             return resultCode;
         }

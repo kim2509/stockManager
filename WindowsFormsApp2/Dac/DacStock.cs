@@ -1,6 +1,8 @@
 ﻿using Dapper;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,13 +10,42 @@ using System.Text;
 using System.Threading.Tasks;
 using WindowsFormsApp2.Common;
 using WindowsFormsApp2.Data;
+using static Dapper.SqlMapper;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace WindowsFormsApp2.Dac
 {
     public class DacStock : DBHelper
     {
-        
+        #region 공통
+
+        public Hashtable 실적상세조회(string inqDate)
+        {
+            Hashtable hash = new Hashtable();
+
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@날짜", inqDate);
+
+            using (var connection = connectionFactory())
+            {
+                GridReader gr = Dapper.SqlMapper.QueryMultiple(connection, "sp_현황조회", p, null, null, CommandType.StoredProcedure);
+                List<StockTarget> targetList = gr.Read<StockTarget>().ToList();
+                hash.Add("대상리스트", targetList);
+
+                List<StockMyOrder> myorderList = gr.Read<StockMyOrder>().ToList();
+                hash.Add("증권사주문리스트", myorderList);
+
+                List<StockOrder> orderList = gr.Read<StockOrder>().ToList();
+                hash.Add("주문리스트", orderList);
+
+                List<당일실적> result = gr.Read<당일실적>().ToList();
+                hash.Add("실적", result);
+            }
+
+            return hash;
+        }
+
+        #endregion
 
         #region tbl_stock_code
         public StockCode 종목정보조회(StockCode stockInfo )

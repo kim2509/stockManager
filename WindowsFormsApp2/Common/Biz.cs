@@ -17,7 +17,6 @@ namespace WindowsFormsApp2.Common
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         bool bDoneStockCodeUpdate = false;
-        bool bTestMode = true;
         public APIManager OpenAPI { get; set; }
 
         public TRBiz trBiz { get; set; }
@@ -42,9 +41,7 @@ namespace WindowsFormsApp2.Common
         public static decimal TotalBalance = 10000000;
         
         // 한 종목당 30만원씩 매수
-        public static int EachStockBudget = 400000;
-
-        bool b장전시간외조회여부 = false;
+        public static int EachStockBudget = 300000;
 
 
         DateTime 최종계좌주문별체결현황요청시간 = DateTime.MinValue;
@@ -120,17 +117,17 @@ namespace WindowsFormsApp2.Common
                     log.Info("loop BuyAndSell finished");
 
                     // 매도요청중인 주문 업데이트 하기 위해.
-                    trBiz.실시간미체결요청();
+                    //trBiz.실시간미체결요청();
 
-                    log.Info("loop 실시간미체결요청 finished");
+                    //log.Info("loop 실시간미체결요청 finished");
 
-                    if (최종계좌주문별체결현황요청시간 == DateTime.MinValue || DateTime.Now.AddSeconds(-120) > 최종계좌주문별체결현황요청시간)
-                    {
-                        trBiz.계좌주문별체결현황요청();
-                        최종계좌주문별체결현황요청시간 = DateTime.Now;
-                    }
+                    //if (최종계좌주문별체결현황요청시간 == DateTime.MinValue || DateTime.Now.AddSeconds(-180) > 최종계좌주문별체결현황요청시간)
+                    //{
+                    //    trBiz.계좌주문별체결현황요청();
+                    //    최종계좌주문별체결현황요청시간 = DateTime.Now;
+                    //}
 
-                    log.Info("loop 계좌주문별체결현황요청 finished");
+                    //log.Info("loop 계좌주문별체결현황요청 finished");
 
                     Thread.Sleep(3000);
 
@@ -471,7 +468,7 @@ namespace WindowsFormsApp2.Common
                 매도요청할주문.Qty = 대상종목.보유수;
                 매도요청할주문.Price = 대상종목.매입단가;
 
-                SellStock(매도요청할주문, 1.5);
+                SellStock(매도요청할주문, 2);
             }
         }
 
