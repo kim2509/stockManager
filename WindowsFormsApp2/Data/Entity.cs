@@ -31,17 +31,18 @@ namespace WindowsFormsApp2.Data
 
     public class StockTarget
     {
+        public string Seq { get; set; }
         public string inqDate { get; set; }
         public string stockCode { get; set; }
         public string stockName { get; set; }
         public string startPrice { get; set; }
         public string currentPrice { get; set; }
-        public string targetPrice { get; set; }
         public string status { get; set; }
         public string 매도방식 { get; set; }
-        public string minsElapsed { get; set; }
         public string buyCnt { get; set; }
         public string sellCnt { get; set; }
+        public string cutCnt { get; set; }
+        public string totalWaterCnt { get; set; }
         public string waterCnt { get; set; }
         public string 보유수 { get; set; }
         public string 증권사수수료 { get; set; }
@@ -51,6 +52,9 @@ namespace WindowsFormsApp2.Data
         public string 평가금액 { get; set; }
         public string 평가손익금액 { get; set; }
         public string 손익률 { get; set; }
+        public string createdDate { get; set; }
+        public string updatedDate { get; set; }
+        public string 실현손익금액 { get; set; }
     }
     public class StockMyOrder
     {

@@ -173,6 +173,7 @@ namespace WindowsFormsApp2.Common
 
                 dacStock.주문정보업데이트_byOrderSeq(orderList[i]);
 
+                Biz.TotalBalance += Util.GetInt(orderList[i].Qty) * Util.GetInt(orderList[i].Price);
             }
 
             if (!string.IsNullOrWhiteSpace(updateTargetStatus))

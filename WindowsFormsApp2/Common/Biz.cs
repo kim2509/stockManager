@@ -296,6 +296,12 @@ namespace WindowsFormsApp2.Common
 
                     for (int i = 0; i < targetList.Count; i++)
                     {
+                        if ( Util.GetInt( targetList[i].cutCnt ) > 0 )
+                        {
+                            log.Info("손절한 이력이 있기때문에 매수안함! stockCode : " + targetList[i].stockCode + " stockName:" + targetList[i].stockName);
+                            continue;
+                        }
+
                         종목증감정보 정보 = dacStock.종목최근등락률조회(inqDate, targetList[i].stockCode);
                         종목실시간정보 실시간정보 = dacStock.최근한종목가격변동내역조회(inqDate, targetList[i].stockCode);
 
@@ -395,6 +401,18 @@ namespace WindowsFormsApp2.Common
                             {
                                 if ("추가매수".Equals(주문리스트[j].OrderOption))
                                     b추가매수가능여부 = false;
+                            }
+                        }
+
+                        주문리스트 = dacStock.tbl_stock_order_주문조회(inqDate, order.stockCode, "매수", "완료");
+                        StockOrder tmpOrder = 주문리스트.Where(x=> "추가매수".Equals(x.OrderOption)).OrderByDescending(x => x.Seq).FirstOrDefault();
+                        if (tmpOrder != null )
+                        {
+                            DateTime createdDate = DateTime.Parse(tmpOrder.updateDate);
+                            if (DateTime.Now.AddMinutes(-1) < createdDate)
+                            {
+                                log.Info("1분내의 추가매수완료건이 존재함");
+                                b추가매수가능여부 = false;
                             }
                         }
 
