@@ -451,6 +451,7 @@ namespace WindowsFormsApp2.Common
                     if (order == null)
                     {
                         order = dacStock.tbl_stock_order_주문조회(inqDate, 매도요청중인종목리스트[i].stockCode, "매도정정", "요청중").FirstOrDefault();
+                        order.Price = 매도요청중인종목리스트[i].currentPrice;
                     }
 
                     if (order == null) continue;
