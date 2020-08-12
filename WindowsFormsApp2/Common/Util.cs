@@ -63,7 +63,7 @@ namespace WindowsFormsApp2.Common
             {
                 string[] ar = toAddress.Split(';').ToArray();
                 for (int i = 0; i < ar.Length; i++)
-                    message.To.Add(toAddress); //ex : ooo@gmail.com
+                    message.To.Add(ar[i]); //ex : ooo@gmail.com
             }
             else
                 message.To.Add(toAddress); //ex : ooo@gmail.com
