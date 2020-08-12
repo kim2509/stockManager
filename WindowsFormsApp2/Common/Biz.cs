@@ -439,6 +439,8 @@ namespace WindowsFormsApp2.Common
             // tbl_stock_target 에서 조회
             List<StockTarget> 매도요청중인종목리스트 = dacStock.종목대상전체조회(inqDate, "매도요청중");
 
+            log.Info("매도요청중인종목 갯수 : " + 매도요청중인종목리스트.Count);
+
             // 3시 20분부터는 매도요청중인 종목을 손절한다.
             if (DateTime.Now.ToString("HHmm").CompareTo("1200") >= 0)
             {
@@ -446,12 +448,14 @@ namespace WindowsFormsApp2.Common
                 {
                     StockOrder order = dacStock.매도요청중인주문한종목조회(inqDate, 매도요청중인종목리스트[i].stockCode);
 
+                    if (order == null)
+                    {
+                        order = dacStock.tbl_stock_order_주문조회(inqDate, 매도요청중인종목리스트[i].stockCode, "매도정정", "요청중").FirstOrDefault();
+                    }
+
                     if (order == null) continue;
 
-                    int price = int.Parse(order.Price);
-                    int qty = int.Parse(order.Qty);
-
-                    매도정정요청(order.inqDate, order.orderNo, order.stockCode, order.stockName, qty, price);
+                    매도정정요청(order.inqDate, order.orderNo, order.stockCode, order.stockName, Util.GetInt(order.Qty), Util.GetInt(order.Price));
                 }
             }
         }
@@ -460,7 +464,6 @@ namespace WindowsFormsApp2.Common
         {
             if (!"매도요청중".Equals(대상종목.status) && Util.GetInt(대상종목.보유수) > 0)
             {
-
                 StockOrder 매도요청할주문 = new StockOrder();
                 매도요청할주문.inqDate = inqDate;
                 매도요청할주문.stockCode = 대상종목.stockCode;
