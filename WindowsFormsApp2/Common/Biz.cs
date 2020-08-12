@@ -854,7 +854,7 @@ namespace WindowsFormsApp2.Common
                     return;
                 }
 
-                if (!string.IsNullOrWhiteSpace(tmpOrder.orderNo))
+                if (string.IsNullOrWhiteSpace(tmpOrder.orderNo))
                 {
                     log.Info("매도정정 주문번호가 없음. orderSeq:" + tmpOrder.Seq);
                     return;
