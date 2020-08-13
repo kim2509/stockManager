@@ -881,6 +881,7 @@ namespace WindowsFormsApp2.Common
                 if (Util.GetInt(tmpOrder.ConfirmQty) > 0)
                 {
                     qty = Util.GetInt(tmpOrder.Qty) - Util.GetInt(tmpOrder.ConfirmQty);
+                    dacStock.대상종목일부매도체결(inqDate, tmpOrder.stockCode, Util.GetInt(tmpOrder.ConfirmQty), Util.GetInt(tmpOrder.ConfirmPrice));
                 }
 
                 orgOrderNo = tmpOrder.orderNo;

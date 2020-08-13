@@ -217,6 +217,21 @@ namespace WindowsFormsApp2.Dac
             return Execute("SP_stock_target_상태변경", p);
         }
 
+        public int 대상종목일부매도체결(string inqDate, string stockCode, int 체결수량, int 체결가)
+        {
+            //string query = Properties.Resources.주식상태대기로변경;
+            //query = string.Format(query, inqDate, order.stockCode);
+            //return Execute(query);
+
+            DynamicParameters p = new DynamicParameters();
+            p.Add("@조회일자", inqDate);
+            p.Add("@종목코드", stockCode);
+            p.Add("@체결수량", 체결수량);
+            p.Add("@체결가", 체결가);
+
+            return Execute("SP_stock_target_일부매도체결처리", p);
+        }
+
         public decimal 매도요청중인금액조회(string inqDate)
         {
             decimal result = 0;
