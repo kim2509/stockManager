@@ -417,7 +417,7 @@ namespace WindowsFormsApp2.Common
                         }
 
 
-                        if (b추가매수가능여부 && waterCnt <= 0)
+                        if (b추가매수가능여부 && waterCnt <= 1)
                             BuyStock(inqDate, order.stockCode, order.stockName, price, "추가매수", waterCnt, "");
                     }
                 }
@@ -725,8 +725,8 @@ namespace WindowsFormsApp2.Common
 
             if ("추가매수".Equals(option))
             {
-                if (waterCnt == 0) qty = qty * 2;
-                else if (waterCnt == 1) qty = qty * 4;
+                if (waterCnt == 0) qty = qty * 1;
+                else if (waterCnt == 1) qty = qty * 2;
             }
 
             StockOrder order = new StockOrder();
