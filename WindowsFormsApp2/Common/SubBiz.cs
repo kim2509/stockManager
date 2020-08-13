@@ -227,7 +227,7 @@ namespace WindowsFormsApp2.Common
                             , Util.GetMoneyFormatString(실적.보유중평가금액손익)
                             , Util.GetMoneyFormatString(실적.실제예상수익));
 
-            Util.SendMail("kim2509@gmail.com;smk10009@naver.com", "오늘 망구PC 주식매매 결과", message);
+            //Util.SendMail("kim2509@gmail.com;smk10009@naver.com", "오늘 망구PC 주식매매 결과", message);
 
                 Hashtable hash = dacStock.실적상세조회(inqDate);
 
@@ -262,7 +262,7 @@ namespace WindowsFormsApp2.Common
                     ms = new MemoryStream(excelPackage.GetAsByteArray());
                 }
 
-                Util.SendMail("kim2509@gmail.com;smk10009@naver.com", "오늘 대용PC 주식매매 결과", message, new Attachment(ms, "매매리포트_" + DateTime.Now.ToString("yyyyMMdd") +
+                Util.SendMail("kim2509@gmail.com;smk10009@naver.com", "오늘 망구PC 주식매매 결과", message, new Attachment(ms, "매매리포트_" + DateTime.Now.ToString("yyyyMMdd") +
                     ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
             } catch ( Exception ex )
             {
