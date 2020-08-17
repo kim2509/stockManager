@@ -81,7 +81,7 @@ namespace WindowsFormsApp2.Common
             smtp.UseDefaultCredentials = false; // 시스템에 설정된 인증 정보를 사용하지 않는다.
             smtp.EnableSsl = true;  // SSL을 사용한다.
             smtp.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network; // 이걸 하지 않으면 naver 에 인증을 받지 못한다.
-            smtp.Credentials = new System.Net.NetworkCredential("kdy2509", "eodyd@509");
+            smtp.Credentials = new System.Net.NetworkCredential("kdy2509", "fdsa4321");
             smtp.Send(message);
 
         }
