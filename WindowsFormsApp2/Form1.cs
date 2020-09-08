@@ -96,7 +96,7 @@ namespace WindowsFormsApp2
                     }
                     else if ( "SetTarget".Equals( ExecuteMode ) )
                     {
-                        trBiz.당일거래량상위요청("1", "3");
+                        trBiz.당일거래량상위요청("3", "2");
                     }
                 }
                 else
