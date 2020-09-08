@@ -323,7 +323,7 @@ namespace WindowsFormsApp2.Common
             else
             {
                 //거래량 거래대금순 모두 조회했다고 가정
-                if ( "3".Equals(장운영구분) && "당일거래량순조회".Equals(e.sRQName))
+                if ( "2".Equals(장운영구분) && "당일거래대금순조회".Equals(e.sRQName))
                 {
                     log.Info("거래대상설정완료 : " + 장운영구분);
                     dacStock.당일거래대상설정(inqDate, DateTime.Now.AddDays(1).ToString("yyyyMMdd"), 장운영구분);
